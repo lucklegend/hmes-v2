@@ -1,9 +1,9 @@
-## DOST Unified Laboratory Information Management System ##
+## Hydromech Engineering Services ##
 
 ###RELEASE NOTES###
 
 This document provides the release notes for the Unified Laboratory Information Management System. 
-It describes installation instructions, configuration changes compared to the previous releases of ULIMS, 
+It describes installation instructions, configuration changes compared to the previous releases of hmes, 
 additional features and etc ...
 
 
@@ -26,75 +26,75 @@ This release has been tested with the following:
 
 ####PRE-INSTALLATION####
 
-From your existing ULIMS installation do the following:
-- Secure a copy of the `ulims/protected/config` and `ulims/images` directory. 
+From your existing hmes installation do the following:
+- Secure a copy of the `hmes/protected/config` and `hmes/images` directory. 
   You will need information from the files in that directory. 
     
-- Export(backup) the databases (ulimsaccounting, ulimscashiering, ulimslab, ulimsportal, phaddress).
+- Export(backup) the databases (hmesaccounting, hmescashiering, hmeslab, hmesportal, phaddress).
     
 (Skip this if you are installing from scratch)
 
 
 ####INSTALLATION####
 
-1. Download or clone ulims from this repository.
+1. Download or clone hmes from this repository.
 2. Extract the release file to a Web-accessible directory:
     ```    
     X:/xampp/htdocs for xampp on windows environment
     /var/www or /var/www/html for linux
     ```  
 
-3. ULIMS Configurations
+3. hmes Configurations
 
-    - Database credentials for ULIMS have been moved to `/ulims/protected/config/db.php` which resides on the same directory as the main.php file. In this way we will always have the same `main.php` file. 
+    - Database credentials for hmes have been moved to `/hmes/protected/config/db.php` which resides on the same directory as the main.php file. In this way we will always have the same `main.php` file. 
 
     - Update the usernames and passwords for the different databases specified in the db.php file.
     
-    - Replace the following files in the `/ulims/protected/config` with the ones you obtained from the Pre-Installation instruction:
+    - Replace the following files in the `/hmes/protected/config` with the ones you obtained from the Pre-Installation instruction:
         ```
         site-settings.ini
         form-settings.ini
         ```
     
-    - Replace the directory `/ulims/images` from the Pre-Installation instruction:
+    - Replace the directory `/hmes/images` from the Pre-Installation instruction:
     
 4. Databases
  
     ##### A. New Installation #####
 
-    - If you are installing from scratch - create and import clean databases from the `ulims/protected/data` directory.
+    - If you are installing from scratch - create and import clean databases from the `hmes/protected/data` directory.
     
     ##### B. Migrating from Existing Installation #####
 
-    - Create and import the database (ulimsaccounting, ulimscashiering, ulimslab, ulimsportal, phaddress) you obtained from the Pre-Installation instruction.
+    - Create and import the database (hmesaccounting, hmescashiering, hmeslab, hmesportal, phaddress) you obtained from the Pre-Installation instruction.
         
-    - Check the structure of the `ulimslab.request` table. The datatype for field `requestDate` should be 'date' and there should be a field `create_time` with a 'TIMESTAMP' datatype. 
+    - Check the structure of the `hmeslab.request` table. The datatype for field `requestDate` should be 'date' and there should be a field `create_time` with a 'TIMESTAMP' datatype. 
             
     - If not, execute the following sql commands separately.
         ```
         ALTER TABLE `request` CHANGE `requestDate` `requestDate` DATE NOT NULL
         ALTER TABLE `request` ADD `create_time` TIMESTAMP
-        UPDATE `ulimslab`.`request` SET `create_time` = `requestDate`
+        UPDATE `hmeslab`.`request` SET `create_time` = `requestDate`
         ALTER TABLE `request` CHANGE `create_time` `create_time` TIMESTAMP NOT NULL
         ALTER TABLE `request` CHANGE `create_time` `create_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ```
     This modifications with fix the issue on generating duplicate request reference when creating requests.
             
             
-    - Truncate the tables `ulimsportal.AuthItem` and `ulimsportal.AuthItemChild`.
+    - Truncate the tables `hmesportal.AuthItem` and `hmesportal.AuthItemChild`.
     
         ```
         TRUNCATE TABLE `AuthItem`
         TRUNCATE TABLE `AuthItemChild`
         ```        
-    Import the `AuthItem.sql` and `AuthItemChild.sql` from `ulims/protected/data` directory to the respective tables in ulimsportal database.
+    Import the `AuthItem.sql` and `AuthItemChild.sql` from `hmes/protected/data` directory to the respective tables in hmesportal database.
     
     ##### C. Additional Database #####
     
-    - A new database has been added for the Referral Module. Create new database `onelabdb` and import  `ulims/protected/data/onelabdb.sql`. 
+    - A new database has been added for the Referral Module. Create new database `onelabdb` and import  `hmes/protected/data/onelabdb.sql`. 
 
 
-    - Select onelabdb and separately execute each of the four(4) sets of commands in the             `ulims/protected/data/onelabdb_views.txt`.
+    - Select onelabdb and separately execute each of the four(4) sets of commands in the             `hmes/protected/data/onelabdb_views.txt`.
   
 
 5.  File/Folder Permissions (for linux installation)
@@ -102,21 +102,21 @@ From your existing ULIMS installation do the following:
     - Grant read/write permissions to several files/folders by running the following commands:
  
         ```
-        sudo chmod -R 777 ulims/assets
-        sudo chmod -R 777 ulims/protected/runtime
-        sudo chmod 777 ulims/config/site-settings.ini
-        sudo chmod 777 ulims/config/form-settings.ini
-        sudo chmod 777 ulims/config/api-settings.ini
+        sudo chmod -R 777 hmes/assets
+        sudo chmod -R 777 hmes/protected/runtime
+        sudo chmod 777 hmes/config/site-settings.ini
+        sudo chmod 777 hmes/config/form-settings.ini
+        sudo chmod 777 hmes/config/api-settings.ini
         ```
         
-        create the folder `ulims/assets` if does not exist.
+        create the folder `hmes/assets` if does not exist.
     
     - The following tables are case-sensitive:
     
         ```
-        ulimsportal.AuthItem
-        ulimsportal.AuthItemChild
-        ulimsportal.Rights
+        hmesportal.AuthItem
+        hmesportal.AuthItemChild
+        hmesportal.Rights
         ```
         
         rename these tables as indicated above.

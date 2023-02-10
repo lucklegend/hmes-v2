@@ -183,6 +183,46 @@ class RequestController extends Controller
 			'model'=>$model,
 		));
 	}
+    /**
+     * Updates a particular model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id the ID of the model to be updated
+     */
+    public function actionDuplicate($id)
+    {
+        if (Yii::app()->request->isPostRequest) {
+            $getRequestRefNum = $this->loadModel($id);
+            $requestRef = $getRequestRefNum->requestRefNum;
+
+            $deletesample = Sample::model()->deleteAll(array(
+                'condition' => 'requestId = :request_id',
+                'params' => array(':request_id' => $requestRef),
+            ));
+
+            $deleteAnalysis = Analysis::model()->deleteAll(array(
+                'condition' => 'requestId = :request_id',
+                'params' => array(':request_id' => $requestRef),
+            ));
+
+            $deleteGenReq = Generatedrequest::model()->deleteAll(array(
+                'condition' => 'request_id = :request_id',
+                'params' => array(':request_id' => $id),
+            ));
+
+            $deletesamplecode = Samplecode::model()->deleteAll(array(
+                'condition' => 'requestId = :request_id',
+                'params' => array(':request_id' => $requestRef),
+            ));
+
+            // we only allow deletion via POST request
+            $this->loadModel($id)->delete();
+
+
+            if (!isset($_GET['ajax']))
+            $this->redirect(array('index'));
+        } else
+            throw new CHttpException(400, 'Invalid request. Please do not repeat this request again.');
+    }
 
 	/**
 	 * Deletes a particular model.

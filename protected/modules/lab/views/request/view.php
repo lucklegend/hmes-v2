@@ -885,7 +885,7 @@ $('#analysis-grid table tbody tr').live('click',function()
 
     function duplicateRequest() {
         <?php echo CHtml::ajax(array(
-            'url' => $this->createUrl('duplicaterequest/create', array('id' => $model->id, 'requestRefNum' => $model->requestRefNum)),
+            'url' => $this->createUrl('request/duplicate', array('id' => $model->id, 'requestRefNum' => $model->requestRefNum)),
             'data' => "js:$(this).serialize()",
             'type' => 'post',
             'dataType' => 'json',

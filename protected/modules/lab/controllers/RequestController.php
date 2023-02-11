@@ -215,7 +215,7 @@ class RequestController extends Controller
             ));
 
             // we only allow deletion via POST request
-            $this->loadModel($id)->delete();
+            // $this->loadModel($id)->delete();
 
 
             if (!isset($_GET['ajax']))
@@ -269,7 +269,6 @@ class RequestController extends Controller
 			// we only allow deletion via POST request
 			$this->loadModel($id)->delete();
 			
-	 		
 			if(!isset($_GET['ajax']))
 				$this->redirect(array('index'));
 		}
@@ -1126,9 +1125,9 @@ class RequestController extends Controller
 			if(count($count) <= 0){
 				$analysesCount--;
 			}
-			 foreach($sample->analyses as $analysis){
-			 	$subTotal = $subTotal + $analysis->fee;
-			 }
+			foreach($sample->analyses as $analysis){
+				$subTotal = $subTotal + $analysis->fee;
+			}
 		}
 		if($analysesCount != $allSamplesCount){
 			$this->redirect(array('request/view','id'=>$id, 'error_msg'=>1));
@@ -1157,20 +1156,20 @@ class RequestController extends Controller
 		$pdf = Yii::createComponent('application.extensions.tcpdf.requestPdf2', 'P', 'cm', 'A4', true, 'UTF-8');
 		$pdf = new requestPdf2(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         spl_autoload_register(array('YiiBase','autoload'));
- 
- 		$pdf->setRequest($request);
+
+        $pdf->setRequest($request);
         $pdf->SetCreator(PDF_CREATOR);  
         $pdf->SetTitle($request->requestRefNum);               
         $pdf->SetMargins(0,87.15,0);
         $pdf->SetAutoPageBreak(TRUE, 60);
         
         $pdf->AddPage();
- 
+
         $pdf->printRows();
         
         // reset pointer to the last page
         $pdf->lastPage();
- 
+
         //Close and output PDF document
         $pdf->Output($request->requestRefNum.'.pdf', 'I');
         //Yii::app()->end();
@@ -1181,9 +1180,9 @@ class RequestController extends Controller
 		$request = Request::model()->findByPk($id);
 		$subTotal =0;
 		foreach($request->samps as $sample){
-			 foreach($sample->analyses as $analysis){
-			 	$subTotal = $subTotal + $analysis->fee;
-			 }
+			foreach($sample->analyses as $analysis){
+				$subTotal = $subTotal + $analysis->fee;
+			}
 		}
 		$discount = $subTotal * $request->disc->rate/100;
         $inplantcharge = $request->inplant_charge;
@@ -1236,10 +1235,7 @@ class RequestController extends Controller
 	            	$this->redirect(array('view','id'=>$requestId));
 	            }	
 			}else{
-				echo CJSON::encode(array(
-	           		'status'=>'error',
-	           		'div'=>"Nothing to save"
-	        	));
+				echo CJSON::encode(array('status'=>'error','div'=>"Nothing to save"));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
@@ -1272,24 +1268,24 @@ class RequestController extends Controller
 
 			if($post->update() === true){
 				if (Yii::app()->request->isAjaxRequest){
-	                echo CJSON::encode(array(
-	                    'status'=>'success', 
-	                    'div'=>"Additional Charge successfully added"
-	                    ));
-	                echo "save";
-	                exit;               
-	            }else{
-	            	echo CJSON::encode(array(
-	            		'status'=>'error',
-	            		'div'=>"Could not save"
-	        		));
-	            	$this->redirect(array('view','id'=>$requestId));
-	            }	
-			}else{
+                    echo CJSON::encode(array(
+                        'status'=>'success', 
+                        'div'=>"Additional Charge successfully added"
+                    ));
+                    echo "save";
+                    exit;               
+                } else {
+                    echo CJSON::encode(array(
+                        'status'=>'error',
+                        'div'=>"Could not save"
+                    ));
+                    $this->redirect(array('view','id'=>$requestId));
+                }	
+			} else {
 				echo CJSON::encode(array(
-	           		'status'=>'error',
-	           		'div'=>"Nothing to save"
-	        	));
+                    'status'=>'error',
+                    'div'=>"Nothing to save"
+                ));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
@@ -1354,16 +1350,22 @@ class RequestController extends Controller
 	{
 		$sampleLabel = Sampletag::view($sample->id);
 
-		$pdf = Yii::createComponent('application.extensions.tcpdf.PrintLabelPdf', 
-		                            'P', 'cm', 'A4', true, 'UTF-8');
+		$pdf = Yii::createComponent(
+            'application.extensions.tcpdf.PrintLabelPdf',
+            'P',
+            'cm',
+            'A4',
+            true,
+            'UTF-8'
+        );
 
 		$pdf = new requestPdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         spl_autoload_register(array('YiiBase','autoload'));
- 
- 		$pdf->setSampleLabel($sampleLabel);
+
+        $pdf->setSampleLabel($sampleLabel);
         // set document information
         $pdf->SetCreator(PDF_CREATOR);  
- 
+
         $pdf->SetTitle($sampleLabel->sampleCode);               
         //$pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, "Selling Report -2013", "selling report for Jun- 2013");
         //$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
@@ -1375,12 +1377,12 @@ class RequestController extends Controller
         $pdf->SetAutoPageBreak(TRUE, 60);
         
         $pdf->AddPage();
- 
+
         $pdf->printRows();
         
         // reset pointer to the last page
         $pdf->lastPage();
- 
+
         //Close and output PDF document
         $pdf->Output($sampleLabel->sampleCode, 'I');
         //Yii::app()->end();
@@ -1404,8 +1406,9 @@ class RequestController extends Controller
 		// $pdf = Yii::createComponent('application.extensions.tcpdf.requestPdf', 
 		//                             'L', 'mm', array(66, 29), true, 'UTF-8');
 		// $pdf = new requestPdf('L', 'mm', array(66, 29), true, 'UTF-8', false);
-		$pdf = Yii::createComponent('application.extensions.tcpdf.requestPdf', 
-		                            'L', 'mm', array(56, 12), true, 'UTF-8');
+		$pdf = Yii::createComponent(
+            'application.extensions.tcpdf.requestPdf','L', 'mm', array(56, 12), true, 'UTF-8'
+        );
 		$pdf = new requestPdf('L', 'mm', array(56, 12), true, 'UTF-8', false);
 		$pdf->SetAutoPageBreak(TRUE, 0);
 		$pdf->SetPrintHeader(false);
@@ -1450,7 +1453,7 @@ class RequestController extends Controller
                   }
                  
                 </style>
-            ';
+        ';
        			$pdf->SetFont('helvetica', '', 10);
                 foreach($request->samps as $sample){
 				$pdf->AddPage();
@@ -1522,70 +1525,67 @@ class RequestController extends Controller
 			);
 
         $classRows = '
-                <style>
-                  table {
-                    font-style: arial;
-                    border-top: 0px solid #000;
-                    border-left: 0px solid #000;
-                    width: 50%;
-					table-layout:fixed;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					display:block;
-					overflow: hidden;
-					white-space: nowrap;
-					margin-left:0;
-					
-                  }
-                  td{
-                    border-right: 0px solid #000;
-                    border-bottom: 0px solid #000;
-					 margin: 0pt !important;
-        			padding: 0pt !important;
-					table-layout:fixed;
-					width:180px;
-					text-overflow: ellipsis;
-					display:block;
-					overflow: hidden;
-					white-space: nowrap;
-                  }
-                </style>
-            ';
+            <style>
+                table {
+                font-style: arial;
+                border-top: 0px solid #000;
+                border-left: 0px solid #000;
+                width: 50%;
+                table-layout:fixed;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display:block;
+                overflow: hidden;
+                white-space: nowrap;
+                margin-left:0;
+                
+                }
+                td{
+                border-right: 0px solid #000;
+                border-bottom: 0px solid #000;
+                    margin: 0pt !important;
+                padding: 0pt !important;
+                table-layout:fixed;
+                width:180px;
+                text-overflow: ellipsis;
+                display:block;
+                overflow: hidden;
+                white-space: nowrap;
+                }
+            </style>
+        ';
 
-				$pdf->SetFont('helvetica', '', 10);
-                foreach($request->samps as $sample){
-				$pdf->AddPage();
-						$year = substr($request->requestDate, 0,4);
-						$sampleBarcode = $sample->id . ' ' . $year. ' ' .$sample->sampleCode;
+        $pdf->SetFont('helvetica', '', 10);
+        foreach($request->samps as $sample){
+            $pdf->AddPage();
+            $year = substr($request->requestDate, 0,4);
+            $sampleBarcode = $sample->id . ' ' . $year. ' ' .$sample->sampleCode;
 
-						$limitname = substr($sample->sampleName, 0,22);
-						$pdf->write1DBarcode($sampleBarcode, 'C39', '1', '0', '', 5, 0.2, $style, 'N');
-						$title = '<b>'.$sampleBarcode.'</b> <font size="6">'.$limitname.'<br><b>Received:</b>&nbsp;'.$request->requestDate.'&nbsp;&nbsp;&nbsp;&nbsp;<b>Due:</b>&nbsp;'.$request->reportDue.'</font>';
-						
-						$pdf->writeHTMLCell(0,0,0,5, $title, 0, 9);
-						$style = array('width' => 0.2, 'cap' => 0, 'join' => 0, 'dash' => 0, 'color' =>'#000000');
-						$pdf->Line(1, 9, 65, 9, $style);
-					
-						$top = 12;
-						$topright = 12;
-						$i = 1;
-							foreach($sample->analyses as $analysis){
-										
-
-											if ($i++ >= 7)
-											 {
-											 	$rows = '<font size="7">'.$analysis->testName.'</font>';	
-												$pdf->writeHTMLCell(0,0,33,$top, $classRows.$rows, 0, 0);
-												$top = $top + 3; 
-											}else{
-													$rows = '<font size="7">'.$analysis->testName.'</font>';	
-													$pdf->writeHTMLCell(0,0,0,$topright, $classRows.$rows, 0, 0);
-													$topright = $topright + 3; 
-											}
-												
-									}  	
-						$pdf->writeHTMLCell(0,0,0,12, $parameters, 0, 9);	 
-						$pdf->lastPage();   		        
+            $limitname = substr($sample->sampleName, 0,22);
+            $pdf->write1DBarcode($sampleBarcode, 'C39', '1', '0', '', 5, 0.2, $style, 'N');
+            $title = '<b>'.$sampleBarcode.'</b> <font size="6">'.$limitname.'<br><b>Received:</b>&nbsp;'.$request->requestDate.'&nbsp;&nbsp;&nbsp;&nbsp;<b>Due:</b>&nbsp;'.$request->reportDue.'</font>';
+            
+            $pdf->writeHTMLCell(0,0,0,5, $title, 0, 9);
+            $style = array('width' => 0.2, 'cap' => 0, 'join' => 0, 'dash' => 0, 'color' =>'#000000');
+            $pdf->Line(1, 9, 65, 9, $style);
+        
+            $top = 12;
+            $topright = 12;
+            $i = 1;
+                foreach($sample->analyses as $analysis){
+                    if ($i++ >= 7){
+                        $rows = '<font size="7">'.$analysis->testName.'</font>';	
+                        $pdf->writeHTMLCell(0,0,33,$top, $classRows.$rows, 0, 0);
+                        $top = $top + 3; 
+                    }else{
+                        $rows = '<font size="7">'.$analysis->testName.'</font>';	
+                        $pdf->writeHTMLCell(0,0,0,$topright, $classRows.$rows, 0, 0);
+                        $topright = $topright + 3; 
+                    }
+                                    
+                }  	
+            $pdf->writeHTMLCell(0,0,0,12, $parameters, 0, 9);	 
+            $pdf->lastPage();   		        
         } 	
 		$pdf->IncludeJS("print();");
         $pdf->Output($request->requestRefNum.'.pdf', 'I');
@@ -1602,20 +1602,19 @@ class RequestController extends Controller
 		$analysis = Analysis::model()->findByPk($id);
 	
 		$tagging=new CActiveDataProvider('Tagging', 
-	 	array(
-			'criteria'=>array(
-		 	'condition'=>"analysisId=" .$id
-				 ),
-			 )
+            array(
+                'criteria'=>array(
+                    'condition'=>"analysisId=".$id
+                ),
+			)
 		);
-
 
 		echo CJSON::encode(array(
 			'div'=>$this->renderPartial('_analysisStatus', array('tagging' => $tagging, 'tag'=>$tag, 'analysis'=>$analysis),true,true)
 		));
 	}
     
-     public function actionStatusDetail()
+    public function actionStatusDetail()
 	{
 		if(isset($_POST['id']))
 		$id=$_POST['id'];

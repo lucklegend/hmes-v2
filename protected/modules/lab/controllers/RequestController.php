@@ -264,13 +264,17 @@ class RequestController extends Controller
 			$deletesamplecode = Samplecode::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
-			));	
-			
-			// we only allow deletion via POST request
-			$this->loadModel($id)->delete();
-			
-			if(!isset($_GET['ajax']))
-				$this->redirect(array('index'));
+			));
+
+            if (Yii::app()->request->isAjaxRequest) {
+                echo CJSON::encode(array(
+                    'status' => 'failure',
+                    'div' => $this->renderPartial('_form', array('model' => $model, 'requestId' => $requestId, 'request' => $request), true, true)
+                ));
+                exit;
+            } else {
+                $this->render('create', array('model' => $model,));
+            }
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');

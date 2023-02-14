@@ -214,10 +214,6 @@ class RequestController extends Controller
                 'params' => array(':request_id' => $requestRef),
             ));
 
-            // we only allow deletion via POST request
-            // $this->loadModel($id)->delete();
-
-
             if (!isset($_GET['ajax']))
             $this->redirect(array('index'));
         } else
@@ -499,14 +495,14 @@ class RequestController extends Controller
             	if($requestCol == '' AND $sampleCol != '' AND $analysisCol != ''){
             		$trimText = '(Id: '.$objWorksheet->getCellByColumnAndRow(16, $row)->getCalculatedValue().')';
             		$analysis = array(
-            				//'sample_id' => $objWorksheet->getCellByColumnAndRow(10, $row)->getValue(),
-            				'sampleCode' => $objWorksheet->getCellByColumnAndRow(14, $sampleRow)->getValue(),
-            				'testId' => $objWorksheet->getCellByColumnAndRow(16, $row)->getCalculatedValue(),
-            				'testName' =>rtrim($objWorksheet->getCellByColumnAndRow(15, $row)->getValue(), $trimText),
-            				'method' => $objWorksheet->getCellByColumnAndRow(17, $row)->getCalculatedValue(),
-            				'references' => $objWorksheet->getCellByColumnAndRow(18, $row)->getCalculatedValue(),
-            				'quantity' => 1,
-            				'fee' => $objWorksheet->getCellByColumnAndRow(19, $row)->getCalculatedValue(),
+						//'sample_id' => $objWorksheet->getCellByColumnAndRow(10, $row)->getValue(),
+						'sampleCode' => $objWorksheet->getCellByColumnAndRow(14, $sampleRow)->getValue(),
+						'testId' => $objWorksheet->getCellByColumnAndRow(16, $row)->getCalculatedValue(),
+						'testName' =>rtrim($objWorksheet->getCellByColumnAndRow(15, $row)->getValue(), $trimText),
+						'method' => $objWorksheet->getCellByColumnAndRow(17, $row)->getCalculatedValue(),
+						'references' => $objWorksheet->getCellByColumnAndRow(18, $row)->getCalculatedValue(),
+						'quantity' => 1,
+						'fee' => $objWorksheet->getCellByColumnAndRow(19, $row)->getCalculatedValue(),
             		);
             		$requestCount = count($importData) - 1;
             		$sampleCount = count($importData[$requestCount]['samples']) - 1;

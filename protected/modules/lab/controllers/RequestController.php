@@ -190,29 +190,30 @@ class RequestController extends Controller
      */
     public function actionDuplicate($id)
     {
+		echo '<script>console.log("niceone");</script>';
         if (Yii::app()->request->isPostRequest) {
             $getRequestRefNum = $this->loadModel($id);
             $requestRef = $getRequestRefNum->requestRefNum;
-
-            $deletesample = Sample::model()->deleteAll(array(
+			echo '<script>console.log('.$requestRef.');</script>';
+            $getSamples = Sample::model()->findAll(array(
+                'condition' => 'requestId = :request_id',
+                'params' => array(':request_id' => $requestRef),
+            ));
+			echo 'here > '.$getSamples;
+            $getAnalysis = Analysis::model()->findAll(array(
                 'condition' => 'requestId = :request_id',
                 'params' => array(':request_id' => $requestRef),
             ));
 
-            $deleteAnalysis = Analysis::model()->deleteAll(array(
-                'condition' => 'requestId = :request_id',
-                'params' => array(':request_id' => $requestRef),
-            ));
+            // $deleteGenReq = Generatedrequest::model()->deleteAll(array(
+            //     'condition' => 'request_id = :request_id',
+            //     'params' => array(':request_id' => $id),
+            // ));
 
-            $deleteGenReq = Generatedrequest::model()->deleteAll(array(
-                'condition' => 'request_id = :request_id',
-                'params' => array(':request_id' => $id),
-            ));
-
-            $deletesamplecode = Samplecode::model()->deleteAll(array(
-                'condition' => 'requestId = :request_id',
-                'params' => array(':request_id' => $requestRef),
-            ));
+            // $deletesamplecode = Samplecode::model()->deleteAll(array(
+            //     'condition' => 'requestId = :request_id',
+            //     'params' => array(':request_id' => $requestRef),
+            // ));
 
             if (!isset($_GET['ajax']))
             $this->redirect(array('index'));

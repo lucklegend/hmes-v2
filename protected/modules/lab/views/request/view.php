@@ -44,6 +44,7 @@
         <small style="float:right;">
             <?php 
                 echo $model->cancelled ? '' : (Yii::app()->getModule('lab')->isLabAdmin() ? $linkDuplicateSR : '');
+                echo '&nbsp;';
                 echo $model->cancelled ? '' : (Yii::app()->getModule('lab')->isLabAdmin() ? $linkCancelWithReason : ''); 
             ?>
         </small>

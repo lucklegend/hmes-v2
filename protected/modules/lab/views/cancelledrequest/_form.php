@@ -24,7 +24,9 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
         echo $form->hiddenField($model,'id');
     ?>
 	<div class="row">
-		<?php echo $form->hiddenField($model,'request_id', array('value'=>$request->id, 'readonly'=>true)); ?>
+		<?php 
+			echo $form->hiddenField($model,'request_id', array('value'=>$request->id, 'readonly'=>true)); 
+		?>
 	</div>
 
 	<div class="row">

@@ -1202,7 +1202,7 @@
     function duplicateRequest() {
         <?php 
             echo CHtml::ajax(array(
-                'url' => $this->createUrl('request/duplicate', array('id' => $model->id, 'requestRefNum' => $model->requestRefNum)),
+                'url' => $this->createUrl('request/duplicate', array('id' => $model->id)),
                 'data' => "js:$(this).serialize()",
                 'type' => 'post',
                 'dataType' => 'json',

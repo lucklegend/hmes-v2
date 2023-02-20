@@ -1208,31 +1208,32 @@ class RequestController extends Controller
 		}
 		
 		if(isset($_POST['Request'])){
-			$request = new Request;
-			$requestRef =$request->requestRefNum;
-			$request->requestRefNum = $get_latest_gen_request;
+			// Create a new Request
+			$new_request = new Request();
+			$new_request->attributes=$_POST['Request'];
+			$new_request->rstl_id = $model->rstl_id;
+			$new_request->customerId = $model->customerId;
+			$new_request->total = $model->total;
+			$new_request->save();
+
+			var_dump($new_request);
 			// Save the duplicate and then 
-			Sample::model()->deleteAll(array(
+			$getSamples = Sample::model()->findAll(array(
 				'condition'=> 'requestId = :request_id',
-				'params' => array(':request_id'=>$requestRef),
+				'params' => array(':request_id'=>$model->requestId),
 			));
 			
-			Analysis::model()->deleteAll(array(
+			$getAnalysis = Analysis::model()->findAll(array(
 				'condition'=> 'requestId = :request_id',
-				'params' => array(':request_id'=>$requestRef),
+				'params' => array(':request_id'=>$model->requestId),
 			));
 			
-			Generatedrequest::model()->deleteAll(array(
-				'condition'=> 'request_id = :request_id',
-				'params' => array(':request_id'=>$id),
-			));	
-			
-			Samplecode::model()->deleteAll(array(
+			Samplecode::model()->findAll(array(
 				'condition'=> 'requestId = :request_id',
-				'params' => array(':request_id'=>$requestRef),
+				'params' => array(':request_id'=>$model->requestId),
 			));
 
-			if($request->save() === true){
+			if($new_request->save()===true){
 				if (Yii::app()->request->isAjaxRequest){
                     echo CJSON::encode(array(
                         'status'=>'success', 
@@ -1248,11 +1249,22 @@ class RequestController extends Controller
                     $this->redirect(array('view','id'=>$requestId));
                 }	
 			} else {
+
+				echo '<pre>';
+				var_dump($new_request);
+				echo '</pre>';
+				echo '</br></br>';
+				echo '<pre>';
+				var_dump($model);
+				echo '</pre>';
+
 				echo CJSON::encode(array(
                     'status'=>'error',
                     'div'=>"Nothing to duplicate"
                 ));
+				// $this->redirect(array('view','id'=>$requestId)); 
 			}
+			
 		}
 
 		if (Yii::app()->request->isAjaxRequest){

@@ -32,7 +32,7 @@
         <div class="row">
             <?php 
                 echo $form->labelEx($model,'requestRefNum', array('label'=>'Duplicate the Service Request'));
-                echo $form->textField($model,'requestRefNum',array('size'=>50, 'maxlength'=>50, 'value'=>$request->requestRefNum, 'readonly'=>true));
+                echo $form->textField($model,'requestRefNum',array('size'=>50, 'maxlength'=>50, 'value'=>$model->requestRefNum, 'readonly'=>true));
                 echo $form->error($model,'requestRefNum'); 
             ?>
         </div>
@@ -226,7 +226,7 @@
     <div class="span4" style="margin-left:0px!important">
         <div class="row buttons">
             <?php 
-                echo CHtml::submitButton('Duplicate', array('id'=>'formsubmit','class'=>'btn btn-primary')); 
+                echo CHtml::submitButton('Duplicate', array('id'=>'formsubmit','class'=>'btn btn-warning')); 
             ?>
         </div>
     </div>

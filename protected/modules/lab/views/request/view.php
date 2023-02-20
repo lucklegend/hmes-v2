@@ -35,8 +35,12 @@
         'style' => 'cursor:pointer;',
         'class' => 'btn btn-warning btn-small',
         'onClick' => 'js:{
-            duplicateRequest(); 
-            $("#dialogDuplicate").dialog("open");
+            if(' . $generated . '>0){
+                alert("Cannot duplicate this Request. If you set the wrong Laboratory when creating this Request, \nleave this Request for now and create a new one with the correct Laboratory.");
+            }else{
+                duplicateRequest(); 
+                $("#dialogDuplicate").dialog("open");
+            }
         }',
     ))
     ?>
@@ -683,7 +687,7 @@
             'autoOpen' => false,
         ),
     ));
-    echo 'dialogbox';
+
     $this->endWidget('zii.widgets.jui.CJuiDialog');
     ?>
     <!-- Inplant Dialog : End -->
@@ -704,7 +708,7 @@
             //'position'=>array(483, 50),
         ),
     ));
-    echo 'dialogbox';
+
     $this->endWidget('zii.widgets.jui.CJuiDialog');
     ?>
     <!-- Additional Dialog : End -->
@@ -769,38 +773,38 @@
     <?php
     $image = CHtml::image(Yii::app()->request->baseUrl . '/images/ajax-loader.gif');
     Yii::app()->clientScript->registerScript('clkrowgrid', "
-$('#sample-grid table tbody tr').live('click',function()
-{
-	    var id = $.fn.yiiGridView.getKey(
-        'sample-grid',
-        $(this).prevAll().length 
-    	);
-		if($(this).children(':nth-child(1)').text()=='No samples.'){
-			alert($(this).children(':nth-child(1)').text());
-	   		//alert(id);
-		}else{
-			updateSample(id);
-			$('#dialogSample').dialog('open');
-		}
-});
-");
+        $('#sample-grid table tbody tr').live('click',function()
+        {
+            var id = $.fn.yiiGridView.getKey(
+            'sample-grid',
+            $(this).prevAll().length 
+            );
+            if($(this).children(':nth-child(1)').text()=='No samples.'){
+                alert($(this).children(':nth-child(1)').text());
+                //alert(id);
+            }else{
+                updateSample(id);
+                $('#dialogSample').dialog('open');
+            }
+        });
+    ");
 
     Yii::app()->clientScript->registerScript('clkrowgrid2', "
-$('#analysis-grid table tbody tr').live('click',function()
-{
-	    var id = $.fn.yiiGridView.getKey(
-        'analysis-grid',
-        $(this).prevAll().length 
-    	);
-		if($(this).children(':nth-child(1)').text()=='No analyses.'){
-			alert($(this).children(':nth-child(1)').text());
-	   		//alert(id);
-		}else{
-			updateAnalysis(id);
-			$('#dialogAnalysis').dialog('open');
-		}
-});
-");
+        $('#analysis-grid table tbody tr').live('click',function()
+        {
+            var id = $.fn.yiiGridView.getKey(
+            'analysis-grid',
+            $(this).prevAll().length 
+            );
+            if($(this).children(':nth-child(1)').text()=='No analyses.'){
+                alert($(this).children(':nth-child(1)').text());
+                //alert(id);
+            }else{
+                updateAnalysis(id);
+                $('#dialogAnalysis').dialog('open');
+            }
+        });
+    ");
     if (isset($_GET['error_msg'])) {
         echo '<script type="text/javascript">alert("One or more analysis is missing. Please CHECK!");</script>';
     }
@@ -880,40 +884,6 @@ $('#analysis-grid table tbody tr').live('click',function()
         )) ?>;
         return false;
 
-    }
-
-    function duplicateRequest() {
-        <?php echo CHtml::ajax(array(
-            'url' => $this->createUrl('request/duplicate', array('id' => $model->id, 'requestRefNum' => $model->requestRefNum)),
-            'data' => "js:$(this).serialize()",
-            'type' => 'post',
-            'dataType' => 'json',
-            'success' => "function(data) {
-                if (data.status == 'failure') {
-                    $('#dialogDuplicate').html(data.div);
-                    // Here is the trick: on submit-> once again this function!
-                    $('#dialogDuplicate form').submit(duplicateRequest);
-                }
-                else {
-                    $.fn.yiiGridView.update('sample-grid');
-	                $.fn.yiiGridView.update('analysis-grid');
-	                location.reload();
-					$('#dialogDuplicate').html(data.div);
-                    setTimeout(\"$('#dialogSample').dialog('close') \",1000);
-					
-                }
-            }",
-            'beforeSend' => 'function(jqXHR, settings){
-                $("#dialogDuplicate").html(
-                    \'<div class="loader">' . $image . '<br\><br\>Processing...<br\> Please wait...</div>\'
-                );
-            }',
-            'error' => "function(request, status, error){
-                $('#dialogDuplicate').html(status+'('+error+')'+': '+ request.responseText );
-                }",
-
-        )) ?>;
-        return false;
     }
 
     function addSample() {
@@ -1157,8 +1127,8 @@ $('#analysis-grid table tbody tr').live('click',function()
 					);
          	}',
             'error' => "function(request, status, error){
-				 	$('#dialogInplant').html(request.responseText );
-					console.log(request);
+                $('#dialogInplant').html(request.responseText );
+                console.log(request);
 			}",
         )) ?>;
         return false;
@@ -1223,13 +1193,48 @@ $('#analysis-grid table tbody tr').live('click',function()
 					);
          	}',
             'error' => "function(request, status, error){
-				 	$('#dialogRemarks').html(request.responseText );
-					console.log(request);
+                $('#dialogRemarks').html(request.responseText );
+                console.log(request);
 			}",
         )) ?>;
         return false;
     }
+    function duplicateRequest() {
+        <?php 
+            echo CHtml::ajax(array(
+                'url' => $this->createUrl('request/duplicate', array('id' => $model->id, 'requestRefNum' => $model->requestRefNum)),
+                'data' => "js:$(this).serialize()",
+                'type' => 'post',
+                'dataType' => 'json',
+                'success' => "function(data) {
+                    if (data.status == 'failure') {
+                        $('#dialogDuplicate').html(data.div);
+                        // Here is the trick: on submit-> once again this function!
+                        $('#dialogDuplicate form').submit(duplicateRequest);
+                    }
+                    else {
+                        $.fn.yiiGridView.update('sample-grid');
+                        $.fn.yiiGridView.update('analysis-grid');
+                        location.reload();
+                        $('#dialogDuplicate').html(data.div);
+                        setTimeout(\"$('#dialogSample').dialog('close') \",1000);
+                        
+                    }
+                }",
+                'beforeSend' => 'function(jqXHR, settings){
+                    $("#dialogDuplicate").html(
+                        \'<div class="loader">'.$image.'<br\><br\>Processing...<br\> Please wait...</div>\'
+                    );
+                }',
+                'error' => "function(request, status, error){
+                    $('#dialogDuplicate').html(request.responseText );
+                    console.log(request);
+                }",
 
+            )) 
+        ?>;
+        return false;
+    }
     function generateSampleCode() {
         <?php
         echo CHtml::ajax(array(

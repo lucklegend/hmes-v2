@@ -1256,4 +1256,5 @@ class Request extends CActiveRecord
         }
         return $discounted;
     }
+
 }

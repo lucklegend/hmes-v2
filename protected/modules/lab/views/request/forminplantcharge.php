@@ -14,11 +14,8 @@ $test = Test::model()->findByPk(1);
 	}else{
 		$id=$sampleId;
 	}
-	$requestId = $_REQUEST['id']
+	$requestId = $_REQUEST['id'];
 	
-?>
-<?php
-
 
 	$form=$this->beginWidget('CActiveForm', array(
 	'id'=>'inplantcharge-form',

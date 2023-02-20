@@ -78,42 +78,23 @@ class RequestController extends Controller
 		));
 	}
 	
-	/** Previous logic for function "checkIfGeneratedSamples" : Start **/
-	/* function checkIfGeneratedSamples($request)
-	{
-		$lastGenerated = Generatedrequest::model()->find(array(
-			'order'=>'id DESC',
-			//'limit'=>1, //not needed with find()
-    		'condition'=>'rstl_id=:rstl_id AND labId=:labId AND year=:year',
-    		'params'=>array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $request->labId, ':year' => date('Y', strtotime($request->requestDate)))
-		));	
-		
-		$currentRequest = Requestcode::model()->find(array(
-    		'condition'=>'rstl_id=:rstl_id AND requestRefNum=:requestRefNum',
-    		'params'=>array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':requestRefNum' => $request->requestRefNum)
-		));	
-		
-		return ($currentRequest->number - $lastGenerated->number);
-	} */
-	/** Previous logic for function "checkIfGeneratedSamples" : End **/
-	
 	function checkIfGeneratedSamples($request)
 	{
 	$generatedThisRequest = Generatedrequest::model()->count(array(
-    		'condition'=>'request_id =:request_id',
-    		'params'=>array(':request_id'=>$request->id)
-		));
+		'condition'=>'request_id =:request_id',
+		'params'=>array(':request_id'=>$request->id)
+	));
 
 	$previousRequest = Request::model()->find(array(
-				'order'=>'id DESC',
-	    		'condition'=>'id<:id AND rstl_id=:rstl_id AND labId=:labId',
-	    		'params'=>array(':id'=>$request->id, ':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $request->labId)
-			));	
+		'order'=>'id DESC',
+		'condition'=>'id<:id AND rstl_id=:rstl_id AND labId=:labId',
+		'params'=>array(':id'=>$request->id, ':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $request->labId)
+	));	
 	
 	$generatedPreviousRequest = Generatedrequest::model()->count(array(
-	    		'condition'=>'request_id =:request_id',
-	    		'params'=>array(':request_id'=>$previousRequest->id)
-			));
+		'condition'=>'request_id =:request_id',
+		'params'=>array(':request_id'=>$previousRequest->id)
+	));
 						
 	switch ($generatedThisRequest) {
 		case (0):
@@ -183,43 +164,6 @@ class RequestController extends Controller
 			'model'=>$model,
 		));
 	}
-    /**
-     * Updates a particular model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id the ID of the model to be updated
-     */
-    public function actionDuplicate($id)
-    {
-		echo '<script>console.log("niceone");</script>';
-        if (Yii::app()->request->isPostRequest) {
-            $getRequestRefNum = $this->loadModel($id);
-            $requestRef = $getRequestRefNum->requestRefNum;
-			echo '<script>console.log('.$requestRef.');</script>';
-            $getSamples = Sample::model()->findAll(array(
-                'condition' => 'requestId = :request_id',
-                'params' => array(':request_id' => $requestRef),
-            ));
-			echo 'here > '.$getSamples;
-            $getAnalysis = Analysis::model()->findAll(array(
-                'condition' => 'requestId = :request_id',
-                'params' => array(':request_id' => $requestRef),
-            ));
-
-            // $deleteGenReq = Generatedrequest::model()->deleteAll(array(
-            //     'condition' => 'request_id = :request_id',
-            //     'params' => array(':request_id' => $id),
-            // ));
-
-            // $deletesamplecode = Samplecode::model()->deleteAll(array(
-            //     'condition' => 'requestId = :request_id',
-            //     'params' => array(':request_id' => $requestRef),
-            // ));
-
-            if (!isset($_GET['ajax']))
-            $this->redirect(array('index'));
-        } else
-            throw new CHttpException(400, 'Invalid request. Please do not repeat this request again.');
-    }
 
 	/**
 	 * Deletes a particular model.
@@ -1240,16 +1184,13 @@ class RequestController extends Controller
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			// $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
-	  //       echo CJSON::encode(array(
-	  //           'status'=>'failure',
-	  //           'div'=>$div));
 			$this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
 	        exit;               
 	    }else{
 	        $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
 	    }		
 	}
+
 	public function actionAdditional(){
 		$model = new Request;
 		$datas = array();
@@ -1290,16 +1231,65 @@ class RequestController extends Controller
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			// $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
-	  //       echo CJSON::encode(array(
-	  //           'status'=>'failure',
-	  //           'div'=>$div));
 			$this->renderPartial('formadditional',array('model'=>$model, 'datas'=>$datas));
 	        exit;               
 	    }else{
 	        $div = $this->renderPartial('formadditional',array('model'=>$model, 'datas'=>$datas));
 	    }		
 	}
+
+	/**
+     * Updates a particular model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id the ID of the model to be updated
+     */
+    public function actionDuplicate($id)
+    {
+		$model = new Request;
+		// Uncomment the following line if AJAX validation is needed
+		// $this->performAjaxValidation($model);
+		$datas = array();
+		if(isset($_GET['id'])){
+			$requestId = $_GET['id'];
+			$model = $model->findByPk($requestId);
+			$datas['id'] = $requestId;
+
+
+		}
+		var_dump(CJSON::encode($model));
+		if(isset($_POST['Request'])){
+			$request = Request::model()->findByPk($requestId);
+			echo 'dito po';
+			var_dump($request);
+
+			if($request->save() === true){
+				if (Yii::app()->request->isAjaxRequest){
+                    echo CJSON::encode(array(
+                        'status'=>'success', 
+                        'div'=>"Successfully Duplicate the Service Request"
+                    ));
+                    echo "save";
+                    exit;               
+                } else {
+                    echo CJSON::encode(array(
+                        'status'=>'error',
+                        'div'=>"Could not Duplicate"
+                    ));
+                    $this->redirect(array('view','id'=>$requestId));
+                }	
+			} else {
+				echo CJSON::encode(array(
+                    'status'=>'error',
+                    'div'=>"Nothing to duplicate"
+                ));
+			}
+		}
+
+		if (Yii::app()->request->isAjaxRequest){
+			$this->renderPartial('formduplicate', array('model'=>$model, 'datas'=>$datas));
+	        exit;               
+	    }	
+    }
 
 	public function actionRemarks(){
 		$model = new Request;

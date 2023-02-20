@@ -584,7 +584,7 @@
             'title' => 'Duplicate Request',
             'show' => 'scale',
             'hide' => 'scale',
-            'width' => 450,
+            'width' => 770,
             'modal' => true,
             'resizable' => false,
             'autoOpen' => false,

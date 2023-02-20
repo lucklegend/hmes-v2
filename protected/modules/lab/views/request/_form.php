@@ -315,14 +315,7 @@
 	<div class="row">
 		<?php echo $form->labelEx($model,'receivedBy'); ?>
 		<?php echo $form->textField($model,'receivedBy',array('size'=>50,'maxlength'=>50, 'value'=>Yii::app()->getModule('user')->user()->getFullName())); ?>
-		<?php 
-				/*echo $form->dropDownList($model,'receivedBy', 
-					CHtml::listData(User::model()->findAll('id = :id AND role=:role ORDER BY fullname', 
-					  array(':id'=>Yii::app()->user->id, ':role'=>'lab')), 'fullname', 'fullname'),
-					array('options' => array(Yii::app()->user->id=>array('selected'=>true)))  
-					);*/
-				?>
-		<?php echo $form->error($model,'receivedBy'); //echo Yii::app()->user->id; print_r(Yii::app()->getModule('user'));?>
+		<?php echo $form->error($model,'receivedBy'); ?>
 	</div>
 
 	<div class="row buttons">

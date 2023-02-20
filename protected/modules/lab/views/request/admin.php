@@ -8,7 +8,6 @@ $this->breadcrumbs=array(
 );
 
 $this->menu=array(
-	//array('label'=>'List Request', 'url'=>array('index')),
 	array('label'=>'Import Data', 'url'=>array('importData')),
 	array('label'=>'Create Request', 'url'=>array('create')),
 );
@@ -16,18 +15,18 @@ $this->menu=array(
 Yii::app()->user->getState('pageSize');
 
 Yii::app()->clientScript->registerScript('search', "
-$('.search-button').click(function(){
-	$('.search-form').toggle();
-	return false;
-});
-$('.search-form form').submit(function(){
-	$('#request-grid').yiiGridView('update', {
-		data: $(this).serialize()
+	$('.search-button').click(function(){
+		$('.search-form').toggle();
+		return false;
 	});
-	return false;
-});
+	$('.search-form form').submit(function(){
+		$('#request-grid').yiiGridView('update', {
+			data: $(this).serialize()
+		});
+		return false;
+	});
 ");
-//echo Yii::app()->user->rstlId;
+
 ?>
 <div class="span6">
 <h1>Manage Requests</h1>
@@ -127,14 +126,14 @@ $('.search-form form').submit(function(){
 			'htmlOptions'=>array('style'=>'text-align:center','title'=>'Click to view payment details'),
 		),
 		array(
-				'name'=>'cancelled',
-				'filter'=>CHtml::listData(array(
-								array('index'=>'0', 'name'=>'No'),
-								array('index'=>'1', 'name'=>'Yes'),
-							), 
-							'index', 'name'),
-    			'htmlOptions' => array('style' => 'text-align: center;'),
-			),
+			'name'=>'cancelled',
+			'filter'=>CHtml::listData(array(
+					array('index'=>'0', 'name'=>'No'),
+					array('index'=>'1', 'name'=>'Yes'),
+				), 
+				'index', 'name'),
+			'htmlOptions' => array('style' => 'text-align: center;'),
+		),
 		array(
  			//'class'=>'CButtonColumn',
  			'class'=>'bootstrap.widgets.TbButtonColumn',
@@ -143,7 +142,7 @@ $('.search-form form').submit(function(){
                   array('page_size'=>'Size',10=>10,20=>20,50=>50,100=>100),
                   array(
                         'onchange'=>"$.fn.yiiGridView.update('request-grid',{ data:{pageSize: $(this).val() }})",
-                        'style'=>'width: 60px;')
+                        'style'=>'width: 65px;')
             ),
             'headerHtmlOptions'=>array('style'=>'text-align: left; padding-right: 10px;'),
             

@@ -182,40 +182,32 @@ class RequestController extends Controller
 
 	public function actionDelete($id)
 	{
-		if(Yii::app()->request->isPostRequest)
-		{
-			$getRequestRefNum = $this->loadModel($id);
-			$requestRef = $getRequestRefNum->requestRefNum;
+		if(Yii::app()->request->isPostRequest){
+			$model = $this->loadModel($id);
+			$requestRef = $model->requestRefNum;
 
-			$deletesample = Sample::model()->deleteAll(array(
+			Sample::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
 			));
 			
-			$deleteAnalysis = Analysis::model()->deleteAll(array(
+			Analysis::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
 			));
 			
-			$deleteGenReq = Generatedrequest::model()->deleteAll(array(
+			Generatedrequest::model()->deleteAll(array(
 				'condition'=> 'request_id = :request_id',
 				'params' => array(':request_id'=>$id),
 			));	
 			
-			$deletesamplecode = Samplecode::model()->deleteAll(array(
+			Samplecode::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
 			));
 
-            if (Yii::app()->request->isAjaxRequest) {
-                echo CJSON::encode(array(
-                    'status' => 'failure',
-                    'div' => $this->renderPartial('_form', array('model' => $model, 'requestId' => $requestId, 'request' => $request), true, true)
-                ));
-                exit;
-            } else {
-                $this->render('create', array('model' => $model,));
-            }
+            if($model->delete())
+				$this->redirect(array('admin'));
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
@@ -258,37 +250,6 @@ class RequestController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		/** 
-		 * Do not delete
-		 *
-			$requestCodes = Requestcode::model()->findAll();
-			foreach($requestCodes as $requestCode){
-				$generatedRequest = New Generatedrequest;
-				$generatedRequest->request_id = $requestCode->id;
-				$generatedRequest->labId = $requestCode->labId;
-				$generatedRequest->year = $requestCode->year;
-				$generatedRequest->number = $requestCode->number;
-				$generatedRequest->save();
-			}
-		**/
-		/*
-		$analysisDeleted = Analysis::model()->findAll(array(
-					'condition' => 'cancelled = :cancelled OR deleted = :deleted',
-				    'params' => array(':cancelled' => 1,':deleted' => 1),
-				));
-		
-				
-		foreach($analysisDeleted as $analysis)
-		{
-			Analysis::model()->updateByPk($analysis->id, 
-			array(
-				'fee'=>0,
-				'cancelled'=>1,
-				'deleted'=>1,
-			));
-		}
-		*/
-
  		// page size drop down changed
         if (isset($_GET['pageSize'])) {
             Yii::app()->user->setState('pageSize',(int)$_GET['pageSize']);
@@ -300,15 +261,7 @@ class RequestController extends Controller
 		if(isset($_GET['Request']))
 			$model->attributes=$_GET['Request'];
 		
-		//$requestcodeExist = $this->checkRequestCodes($this->getRstlId());	
-		
-		//if($requestcodeExist){
 			$dataProvider=new CActiveDataProvider($model, array(
-			    /*'criteria'=>array(
-			        'condition'=>'cancelled=0',
-			        //'order'=>'requestRefNum DESC',
-			        //'with'=>array('customer'),
-			    ),*/
 			    'pagination'=>array(
 			        'pageSize'=>20,
 			    ),
@@ -316,11 +269,7 @@ class RequestController extends Controller
 	
 			$this->render('admin',array(
 				'model'=>$model, 'customers'=>$dataProvider,
-				//'requestcodeExist'=>$requestcodeExist
 			));
-		/*}else{
-			$this->redirect($this->createUrl('requestcode/create'),array());
-		}*/
 	}
 
 	public function actionImportData()
@@ -1248,19 +1197,40 @@ class RequestController extends Controller
 		$model = new Request;
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
-		$datas = array();
+		$data = array();
 		if(isset($_GET['id'])){
 			$requestId = $_GET['id'];
 			$model = $model->findByPk($requestId);
-			$datas['id'] = $requestId;
-
-
+			$data['id'] = $requestId;
+			// get the lastest generated request.
+			$get_latest_gen_request = $model->generateRequestRef($model->labId);
+			$data['lastest_gen_request'] = $get_latest_gen_request;
 		}
-		var_dump(CJSON::encode($model));
+		
 		if(isset($_POST['Request'])){
-			$request = Request::model()->findByPk($requestId);
-			echo 'dito po';
-			var_dump($request);
+			$request = new Request;
+			$requestRef =$request->requestRefNum;
+			$request->requestRefNum = $get_latest_gen_request;
+			// Save the duplicate and then 
+			Sample::model()->deleteAll(array(
+				'condition'=> 'requestId = :request_id',
+				'params' => array(':request_id'=>$requestRef),
+			));
+			
+			Analysis::model()->deleteAll(array(
+				'condition'=> 'requestId = :request_id',
+				'params' => array(':request_id'=>$requestRef),
+			));
+			
+			Generatedrequest::model()->deleteAll(array(
+				'condition'=> 'request_id = :request_id',
+				'params' => array(':request_id'=>$id),
+			));	
+			
+			Samplecode::model()->deleteAll(array(
+				'condition'=> 'requestId = :request_id',
+				'params' => array(':request_id'=>$requestRef),
+			));
 
 			if($request->save() === true){
 				if (Yii::app()->request->isAjaxRequest){
@@ -1286,7 +1256,7 @@ class RequestController extends Controller
 		}
 
 		if (Yii::app()->request->isAjaxRequest){
-			$this->renderPartial('formduplicate', array('model'=>$model, 'datas'=>$datas));
+			$this->renderPartial('formduplicate', array('model'=>$model, 'data'=>$data));
 	        exit;               
 	    }	
     }

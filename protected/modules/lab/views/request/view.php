@@ -1134,7 +1134,7 @@
 					);
             }',
             'error' => "function(request, status, error){
-                $('#dialogInplant').html(request.responseText);
+                $('#dialogInplant').html(status+'('+error+')'+': '+ request.responseText );
                 console.log(request);
 			}",
         )) ?>;
@@ -1166,7 +1166,7 @@
 					);
             }',
             'error' => "function(request, status, error){
-				$('#dialogAdditional').html(status+'('+error+')'+': '+ request.responseText + ' {'+error.code+'}' );
+				$('#dialogAdditional').html(status+'('+error+')'+': '+ request.responseText );
 				console.log(error);
 			}",
         )) ?>;
@@ -1201,14 +1201,14 @@
 					);
          	}',
             'error' => "function(request, status, error){
-                $('#dialogRemarks').html(request.responseText );
+                $('#dialogRemarks').html(status+'('+error+')'+': '+ request.responseText );
                 console.log(error);
 			}",
         )) ?>;
         return false;
     }
     function duplicateRequest() {
-        <?php 
+        <?php   
             echo CHtml::ajax(array(
                 'url' => $this->createUrl('request/duplicate', array('id' => $model->id)),
                 'data' => "js:$(this).serialize()",
@@ -1225,7 +1225,7 @@
                         $.fn.yiiGridView.update('analysis-grid');
                         location.reload();
                         $('#dialogDuplicate').html(data.div);
-                        setTimeout(\"$('#dialogSample').dialog('close') \",1000);
+                        setTimeout(\"$('#dialogDuplicate').dialog('close') \",1000);
                         
                     }
                 }",
@@ -1235,7 +1235,7 @@
                     );
                 }',
                 'error' => "function(request, status, error){
-                    $('#dialogDuplicate').html(status+'('+error+')'+': '+ request.responseText + ' {'+error.code+'}' );
+                    $('#dialogDuplicate').html(status+'('+error+')'+': '+ request.responseText );
                     console.log(error);
                 }",
 

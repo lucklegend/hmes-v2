@@ -257,7 +257,6 @@ class Request extends CActiveRecord
         $tmp = '<div class="raw2">';
         foreach ($collections as $collection) {
             $tmp = $tmp.$collection->receipt->receiptDate.'  ';
-           
         }
         $tmp = $tmp.'</div>';
         return $tmp;
@@ -423,7 +422,7 @@ class Request extends CActiveRecord
 	}
 	
 	function generateRequestRef($lab) {
-		$year = date('Y', strtotime($this->requestDate));
+		$year = date('Y');
 		$request = Request::model()->find(array(
             'select' => 'requestRefNum, rstl_id, labId, requestDate', 
 			'order' => 'create_time DESC, id DESC',
@@ -447,10 +446,7 @@ class Request extends CActiveRecord
 		}
 		
 		$labCode = Lab::model()->findByPk($lab);
-		// $rstl = Rstl::model()->findByPk(Yii::app()->Controller->getRstlId());
-		// $requestRefNo = $rstl->code.'-'.$labCode->labCode.'-'.$date.'-'.$number;
 		$rstl = 'HME';
-		// $requestRefNo = $rstl.$year.'-'.$labCode->labCode.'-'.$month.'-'.$number;
 		$requestRefNo = $rstl.$year.'-'.$labCode->labCode.'-'.$number;
 
 		return $requestRefNo;

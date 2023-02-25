@@ -8,8 +8,6 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
 
 <div class="form">
     <?php
-        $requestId = $_REQUEST['id'];
-
         $form = $this->beginWidget('CActiveForm', array(
             'id'=>'duplicate-form',
             // Please note: When you enable ajax validation, make sure the corresponding
@@ -26,7 +24,6 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
             echo $form->hiddenField($model,'customerId', array('value'=>$model->customerId, 'readonly'=>true));
             echo $form->hiddenField($model,'total', array('value'=>$model->total, 'readonly'=>true)); 
             echo $form->hiddenField($model,'labId', array('value'=>$model->labId, 'readonly'=>true)); 
-            echo $form->hiddenField($model,'receivedBy', array('value'=>$model->receivedBy, 'readonly'=>true)); 
 		?>
 	</div>
     
@@ -49,7 +46,7 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
 
                 $this->widget('zii.widgets.jui.CJuiDatePicker', array(
                     'name'=>'Request[requestDate]',
-                    'value'=>$model->requestDate ? date('m/d/Y',strtotime($model->requestDate)) : date('m/d/Y'),
+                    'value'=>date('m/d/Y'),
                     // additional javascript options for the date picker plugin
                     
                     'options'=>array(
@@ -105,8 +102,9 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
         <div class="row">
             <?php echo $form->labelEx($model,'paymentType'); ?>
             <div class="compactRadioGroup">
-            <?php echo $form->radioButtonList($model, 'paymentType', array(1=>'PAID',2=>'FULLY SUBSIDIZED'),
-                            array( 'separator' => "  "));
+            <?php 
+                echo $form->radioButtonList($model, 'paymentType', array(1=>'PAID',2=>'FULLY SUBSIDIZED'),
+                    array( 'separator' => "  "));
             ?>  
             </div>
             <?php echo $form->error($model,'paymentType'); ?>
@@ -117,21 +115,17 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
     <div class="span4" style="margin-left:0px!important">
         
         <div class="row">
-            <?php echo $form->labelEx($model,'transmission'); ?>
-            <?php //echo $form->dropDownList($model,'transmission', array('Pick-up'=>'Pick-up', 'Email'=>'Email', 'Courier'=>'Courier', 'Fax'=>'Fax'), array('Pick-up'=>'Pick Up')); ?>
-            <?php echo $form->dropDownList($model,'transmission', Transmission::listData(), array('Pick-up'=>'Pick Up') ); ?>
-            <?php echo $form->error($model,'transmission'); ?>
+            <?php 
+                echo $form->labelEx($model,'transmission');
+                echo $form->dropDownList($model,'transmission', Transmission::listData(), array('Pick-up'=>'Pick Up') );
+                echo $form->error($model,'transmission'); 
+            ?>
         </div>
 
-        <!-- <div class="row"> -->
-            <?php //echo $form->labelEx($model,'purpose'); ?>
-            <?php //echo $form->dropDownList($model, 'purpose', Purpose::listData(), array('empty'=>'Select Here') ); ?>
-            <?php //echo $form->error($model,'purpose'); ?>
-        <!-- </div> -->
-
         <div class="row">
-            <?php echo $form->labelEx($model,'discount'); ?>
-            <?php echo $form->Dropdownlist($model,'discount', Discount::listData(), 
+            <?php 
+                echo $form->labelEx($model,'discount');  
+                echo $form->Dropdownlist($model,'discount', Discount::listData(), 
                     array(
                     // 'empty'=>'Select Option',
                     // 'style'=>'width: 265px;',
@@ -152,8 +146,9 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
                             $('#Request_discounted.select_discount').attr('autofocus', true);
                         }
                     });",
-                )); ?>
-                <?php echo $form->error($model,'discount'); ?>
+                ));  
+                echo $form->error($model,'discount'); 
+            ?>
         </div>
         <?php 
             if($model->discount==8){
@@ -163,9 +158,11 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
             }
         ?>
         <div class="row">
-            <?php echo $form->labelEx($model,'discounted', array('style'=>$display, 'id'=>'labelDiscounted', 'class'=>'label_discounted')); ?>
-            <?php echo $form->textField($model,'discounted', array('style'=>$display, 'class'=>'input_discounted', 'maxlength'=>1000)); ?>
-            <?php echo $form->error($model,'discounted'); ?>
+            <?php 
+                echo $form->labelEx($model,'discounted', array('style'=>$display, 'id'=>'labelDiscounted', 'class'=>'label_discounted'));
+                echo $form->textField($model,'discounted', array('style'=>$display, 'class'=>'input_discounted', 'maxlength'=>1000));
+                echo $form->error($model,'discounted'); 
+            ?>
         </div>
 
         <div class="row">
@@ -175,7 +172,7 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
                     $this->widget('zii.widgets.jui.CJuiDatePicker', array(
                         'model'=>$model,
                         'name'=>'Request[reportDue]',
-                        'value'=>date('m/d/Y',strtotime($model->reportDue)),
+                        'value'=>date('m/d/Y'),
                         'options'=>array(
                             'startDate'=>date('m/d/Y'),
                             'minDate'=>'0',
@@ -205,21 +202,34 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
         </div>
         
         <div class="row">
-            <?php echo $form->labelEx($model,'conforme'); ?>
-            <?php echo $form->textField($model,'conforme',array('size'=>50,'maxlength'=>50)); ?>
-            <?php echo $form->error($model,'conforme'); ?>
+            <?php 
+                echo $form->labelEx($model,'conforme');
+                echo $form->textField($model,'conforme',array('size'=>50,'maxlength'=>50));
+                echo $form->error($model,'conforme'); 
+            ?>
         </div>
 
         <div class="row">
-            <?php echo $form->labelEx($model,'conforme_designation'); ?>
-            <?php echo $form->textField($model,'conforme_designation',array('size'=>50,'maxlength'=>50)); ?>
-            <?php echo $form->error($model,'conforme_designation'); ?>
+            <?php 
+                echo $form->labelEx($model,'conforme_designation');
+                echo $form->textField($model,'conforme_designation',array('size'=>50,'maxlength'=>50));                
+                echo $form->error($model,'conforme_designation'); 
+            ?>
         </div>
 
         <div class="row">
-            <?php echo $form->labelEx($model,'validated_by'); ?>
-            <?php echo $form->textField($model,'validated_by',array('size'=>50,'maxlength'=>50)); ?>
-            <?php echo $form->error($model,'validated_by'); ?>
+            <?php 
+                echo $form->labelEx($model,'validated_by'); 
+                echo $form->textField($model,'validated_by',array('size'=>50,'maxlength'=>50));                
+                echo $form->error($model,'validated_by'); 
+            ?>
+        </div>
+        <div class="row">
+            <?php 
+                echo $form->labelEx($model,'receivedBy'); 
+                echo $form->textField($model,'receivedBy',array('size'=>50,'maxlength'=>50));                
+                echo $form->error($model,'receivedBy'); 
+            ?>
         </div>
     </div>
 	<div class="span4" style="margin-left:0px!important"></div>

@@ -1191,42 +1191,44 @@ class RequestController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id the ID of the model to be updated
      */
-    public function actionDuplicate($id)
+    public function actionDuplicate()
     {
 		$checkRequest = new Request;
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 		$data = array();
-		$checkRequest = $checkRequest->findByPk($id);
-		$data['id'] = $id;
-		// get the lastest generated request.
-		$get_latest_gen_request = $checkRequest->generateRequestRef($checkRequest->labId);
-		$data['lastest_gen_request'] = $get_latest_gen_request;
-		$data['total'] = $checkRequest->total;
-		$data['customerId'] = $checkRequest->customerId;
-		$data['rstl_id'] = $checkRequest->rstl_id;
-		
-		
-		if(isset($_POST['Request'])){
-			// Create a new Request
-			$model = new Request;
-			$model->attributes = $_POST['Request'];
+		if (isset($_GET['id'])) {
 
-			if ($model->save()) {
-				echo 'here save';
+			$requestId = $_GET['id'];
+			$checkRequest = $checkRequest->findByPk($requestId);
+			$get_latest_gen_request = $checkRequest->generateRequestRef($checkRequest->labId);
+			$data['lastest_gen_request'] = $get_latest_gen_request;
+			$data['total'] = $checkRequest->total;
+			$data['customerId'] = $checkRequest->customerId;
+			$data['rstl_id'] = $checkRequest->rstl_id;
+		}	
+		
+		if (isset($_POST['Request'])) {
+			echo '<script>console.log("request boi");</script>';
+			$newRequest = new Request;
+			// Create a new Request
+			$newRequest->paymentType=1;
+			$newRequest->attributes = $_POST['Request'];
+			$newRequest->customerName=customer::model()->findByPk($newRequest->customerId)->customerName;
+
+			if ($newRequest->save()) {
 				if (Yii::app()->request->isAjaxRequest){
                     echo CJSON::encode(array(
                         'status' => 'success', 
                         'div' => "Successfully Duplicate the Service Request"
                     ));
-                    echo "save";
                     exit;               
                 } else {
                     echo CJSON::encode(array(
                         'status' => 'error',
                         'div' => "Could not Duplicate"
                     ));
-                    $this->redirect(array('view','id'=>$model->id));
+                    $this->redirect(array('view','id'=>$newRequest->id));
                 }	
 			} 
 			else {
@@ -1234,6 +1236,7 @@ class RequestController extends Controller
                     'status' => 'error',
                     'div' => "Nothing to duplicate"
                 ));
+				// $this->redirect(array('view','id'=>$requestId));
 			}
 			
 		}

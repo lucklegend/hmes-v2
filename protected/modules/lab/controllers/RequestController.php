@@ -53,7 +53,7 @@ class RequestController extends Controller
 	public function actionView($id)
 	{
 		
-		$model=$this->loadModel($id);
+		$model = $this->loadModel($id);
 		
 		$sampleDataProvider = new CArrayDataProvider($model->samps, 
 			array(
@@ -418,10 +418,10 @@ class RequestController extends Controller
 		//$has_duplicate = true;
 		
 		$this->render('importData',array(
-			'file_path'=>$file_path,
-			'importDataProvider'=>$importDataProvider, 
-			'importData'=>$arr,
-			'data'=>$data,
+			'file_path' => $file_path,
+			'importDataProvider' => $importDataProvider, 
+			'importData' => $arr,
+			'data' => $data,
 			'has_duplicate'=>$this->checkExistingRequests($arr)
 		));
 	}
@@ -1105,26 +1105,22 @@ class RequestController extends Controller
 			$datas['id'] = $requestId;
 			$datas['inplant_charge'] = $model->inplant_charge;
 		}
-		//var_dump($datas);
 		if(isset($_POST['Request'])){
 			$post = Request::model()->findByPk($requestId);
 			$post->inplant_charge = $_POST['Request']['inplant_charge'];
-			//echo $post->inplant_charge;
 			$post->update();
-			var_dump($post->update());
 
 			if($post->update() === true){
 				if (Yii::app()->request->isAjaxRequest){
 	                echo CJSON::encode(array(
 	                    'status'=>'success', 
-	                    'div'=>"In-Plant Charge successfully added"
+	                    'div'=>"On-site Charge successfully added"
 	                    ));
-	                echo "save";
 	                exit;               
 	            }else{
 	            	echo CJSON::encode(array(
 	            		'status'=>'error',
-	            		'div'=>"Could not save"
+	            		'div'=>"Could not update On-site charge"
 	        		));
 	            	$this->redirect(array('view','id'=>$requestId));
 	            }	
@@ -1133,10 +1129,13 @@ class RequestController extends Controller
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			$this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
+			$div = $this->renderPartial('forminplantcharge', array('model'=>$model, 'datas'=>$datas), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div' => $div));
 	        exit;               
 	    }else{
-	        $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
+	        $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
 	    }		
 	}
 
@@ -1155,36 +1154,36 @@ class RequestController extends Controller
 			$post->additional = $_POST['Request']['additional'];
 			//echo $post->inplant_charge;
 			$post->update();
-			var_dump($post->update());
-
-			if($post->update() === true){
-				if (Yii::app()->request->isAjaxRequest){
+			if($post->update()){
+				if (Yii::app()->request->isAjaxRequest) {
                     echo CJSON::encode(array(
                         'status'=>'success', 
                         'div'=>"Additional Charge successfully added"
                     ));
-                    echo "save";
                     exit;               
                 } else {
                     echo CJSON::encode(array(
                         'status'=>'error',
-                        'div'=>"Could not save"
+                        'div'=>"Could not update additional"
                     ));
                     $this->redirect(array('view','id'=>$requestId));
                 }	
 			} else {
 				echo CJSON::encode(array(
                     'status'=>'error',
-                    'div'=>"Nothing to save"
+                    'div'=>"Nothing to update"
                 ));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			$this->renderPartial('formadditional',array('model'=>$model, 'datas'=>$datas));
+			$div = $this->renderPartial('formadditional', array('model'=>$model, 'datas'=>$datas), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div' => $div));
 	        exit;               
-	    }else{
-	        $div = $this->renderPartial('formadditional',array('model'=>$model, 'datas'=>$datas));
-	    }		
+	    } else {
+			$this->render('createadditional',array('model'=>$model,'datas'=>$datas));
+		}		
 	}
 
 	/**
@@ -1194,83 +1193,60 @@ class RequestController extends Controller
      */
     public function actionDuplicate($id)
     {
-		$model = new Request;
+		$checkRequest = new Request;
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 		$data = array();
-		if(isset($_GET['id'])){
-			$requestId = $_GET['id'];
-			$model = $model->findByPk($requestId);
-			$data['id'] = $requestId;
-			// get the lastest generated request.
-			$get_latest_gen_request = $model->generateRequestRef($model->labId);
-			$data['lastest_gen_request'] = $get_latest_gen_request;
-		}
+		$checkRequest = $checkRequest->findByPk($id);
+		$data['id'] = $id;
+		// get the lastest generated request.
+		$get_latest_gen_request = $checkRequest->generateRequestRef($checkRequest->labId);
+		$data['lastest_gen_request'] = $get_latest_gen_request;
+		$data['total'] = $checkRequest->total;
+		$data['customerId'] = $checkRequest->customerId;
+		$data['rstl_id'] = $checkRequest->rstl_id;
+		
 		
 		if(isset($_POST['Request'])){
 			// Create a new Request
-			$new_request = new Request();
-			$new_request->attributes=$_POST['Request'];
-			$new_request->rstl_id = $model->rstl_id;
-			$new_request->customerId = $model->customerId;
-			$new_request->total = $model->total;
-			$new_request->save();
+			$model = new Request;
+			$model->attributes = $_POST['Request'];
 
-			var_dump($new_request);
-			// Save the duplicate and then 
-			$getSamples = Sample::model()->findAll(array(
-				'condition'=> 'requestId = :request_id',
-				'params' => array(':request_id'=>$model->requestId),
-			));
-			
-			$getAnalysis = Analysis::model()->findAll(array(
-				'condition'=> 'requestId = :request_id',
-				'params' => array(':request_id'=>$model->requestId),
-			));
-			
-			Samplecode::model()->findAll(array(
-				'condition'=> 'requestId = :request_id',
-				'params' => array(':request_id'=>$model->requestId),
-			));
-
-			if($new_request->save()===true){
+			if ($model->save()) {
+				echo 'here save';
 				if (Yii::app()->request->isAjaxRequest){
                     echo CJSON::encode(array(
-                        'status'=>'success', 
-                        'div'=>"Successfully Duplicate the Service Request"
+                        'status' => 'success', 
+                        'div' => "Successfully Duplicate the Service Request"
                     ));
                     echo "save";
                     exit;               
                 } else {
                     echo CJSON::encode(array(
-                        'status'=>'error',
-                        'div'=>"Could not Duplicate"
+                        'status' => 'error',
+                        'div' => "Could not Duplicate"
                     ));
-                    $this->redirect(array('view','id'=>$requestId));
+                    $this->redirect(array('view','id'=>$model->id));
                 }	
-			} else {
-
-				echo '<pre>';
-				var_dump($new_request);
-				echo '</pre>';
-				echo '</br></br>';
-				echo '<pre>';
-				var_dump($model);
-				echo '</pre>';
-
+			} 
+			else {
 				echo CJSON::encode(array(
-                    'status'=>'error',
-                    'div'=>"Nothing to duplicate"
+                    'status' => 'error',
+                    'div' => "Nothing to duplicate"
                 ));
-				// $this->redirect(array('view','id'=>$requestId)); 
 			}
 			
 		}
-
+		
 		if (Yii::app()->request->isAjaxRequest){
-			$this->renderPartial('formduplicate', array('model'=>$model, 'data'=>$data));
-	        exit;               
-	    }	
+			$div = $this->renderPartial('formduplicate', array('model'=>$checkRequest, 'data'=>$data), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div'=>$div));
+			exit;               
+		}else {
+			$this->render('createduplicate',array('model'=>$checkRequest,'data'=>$data));
+		}	
     }
 
 	public function actionRemarks(){
@@ -1295,24 +1271,26 @@ class RequestController extends Controller
 	                    'status'=>'success', 
 	                    'div'=>"Remarks successfully added"
 	                    ));
-	                echo "save";
 	                exit;               
 	            }else{
 	            	echo CJSON::encode(array(
 	            		'status'=>'error',
-	            		'div'=>"Could not save"
+	            		'div'=>"Could not update remarks"
 	        		));
 	            	$this->redirect(array('view','id'=>$requestId));
 	            }	
 			}else{
 				echo CJSON::encode(array(
 	           		'status'=>'error',
-	           		'div'=>"Nothing to save"
+	           		'div'=>"Nothing to update remarks"
 	        	));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			$this->renderPartial('formremarks',array('model'=>$model, 'datas'=>$datas));
+			$div = $this->renderPartial('formremarks', array('model'=>$model, 'datas'=>$datas), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div'=>$div));
 	        exit;               
 	    }else{
 	        $this->renderPartial('formremarks',array('model'=>$model, 'datas'=>$datas));
@@ -1321,7 +1299,7 @@ class RequestController extends Controller
 
 	public function actionPrintLabelPdf($sample_id)
 	{
-		$sampleLabel = Sampletag::view($sample->id);
+		$sampleLabel = Sampletag::view($sample_id);
 
 		$pdf = Yii::createComponent(
             'application.extensions.tcpdf.PrintLabelPdf',

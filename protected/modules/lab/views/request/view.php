@@ -47,7 +47,14 @@
     <h1>Service Request: <?php echo $model->requestRefNum; ?>
         <small style="float:right;">
             <?php 
-                echo $model->cancelled ? '' : (Yii::app()->getModule('lab')->isLabAdmin() ? $linkDuplicateSR : '');
+                if($generated == 0){
+                    if(Yii::app()->getModule('lab')->isAdmin()){
+                        if(!$model->cancelled){
+                            echo $linkDuplicateSR;
+                        }
+                        
+                    }
+                }           
                 echo '&nbsp;';
                 echo $model->cancelled ? '' : (Yii::app()->getModule('lab')->isLabAdmin() ? $linkCancelWithReason : ''); 
             ?>
@@ -1015,16 +1022,16 @@
                     setTimeout(\"$('#dialogAnalysis').dialog('close') \",1000);
 					
                 }
- 
+
             }",
             'beforeSend' => 'function(jqXHR, settings){
                     $("#dialogAnalysis").html(
 						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
 					);
-             }',
+            }',
             'error' => "function(request, status, error){
-				 	$('#dialogAnalysis').html(status+'('+error+')'+': '+ request.responseText );
-					}",
+                $('#dialogAnalysis').html(status+'('+error+')'+': '+ request.responseText );
+			}",
 
         )) ?>;
         return false;
@@ -1119,15 +1126,15 @@
                     setTimeout(\"$('#dialogInplant').dialog('close') \",1000);
 					
                 }
- 
+
             }",
             'beforeSend' => 'function(jqXHR, settings){
                     $("#dialogInplant").html(
 						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
 					);
-         	}',
+            }',
             'error' => "function(request, status, error){
-                $('#dialogInplant').html(request.responseText );
+                $('#dialogInplant').html(request.responseText);
                 console.log(request);
 			}",
         )) ?>;
@@ -1152,16 +1159,15 @@
                     setTimeout(\"$('#dialogAdditional').dialog('close') \",1000);
 					
                 }
- 
             }",
             'beforeSend' => 'function(jqXHR, settings){
                     $("#dialogAdditional").html(
 						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
 					);
-         	}',
+            }',
             'error' => "function(request, status, error){
-				 	$('#dialogAdditional').html(request.responseText );
-					console.log(request);
+				$('#dialogAdditional').html(status+'('+error+')'+': '+ request.responseText + ' {'+error.code+'}' );
+				console.log(error);
 			}",
         )) ?>;
         return false;
@@ -1180,12 +1186,14 @@
                     $('#dialogRemarks form').submit(addRemarks);
                 }
                 else{
+                    $.fn.yiiGridView.update('sample-grid');
                     $.fn.yiiGridView.update('analysis-grid');
+                    location.reload();
 					$('#dialogRemarks').html(data.div);
                     setTimeout(\"$('#dialogRemarks').dialog('close') \",1000);
 					
                 }
- 
+
             }",
             'beforeSend' => 'function(jqXHR, settings){
                     $("#dialogRemarks").html(
@@ -1194,7 +1202,7 @@
          	}',
             'error' => "function(request, status, error){
                 $('#dialogRemarks').html(request.responseText );
-                console.log(request);
+                console.log(error);
 			}",
         )) ?>;
         return false;
@@ -1227,8 +1235,8 @@
                     );
                 }',
                 'error' => "function(request, status, error){
-                    $('#dialogDuplicate').html(request.responseText );
-                    console.log(request);
+                    $('#dialogDuplicate').html(status+'('+error+')'+': '+ request.responseText + ' {'+error.code+'}' );
+                    console.log(error);
                 }",
 
             )) 

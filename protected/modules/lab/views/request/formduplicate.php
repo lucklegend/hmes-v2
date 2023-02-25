@@ -2,7 +2,8 @@
 /* @var $this RequestController */
 /* @var $model Request */
 /* @var $form CActiveForm */
-
+Yii::app()->clientscript->scriptMap['jquery.js'] = false;
+Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
 ?>
 
 <div class="form">
@@ -18,22 +19,21 @@
             'enableAjaxValidation'=>false,
         )); 
 
-        echo $form->errorSummary($model); 
-        echo $form->hiddenField($model, 'id', array('value' => $requestId)); 
+        echo $form->errorSummary($model);         
     ?>
     <div class="row">
 		<?php
-            echo $form->hiddenField($model,'id', array('value'=>$requestId, 'readonly'=>true)); 
+            echo $form->hiddenField($model,'customerId', array('value'=>$model->customerId, 'readonly'=>true));
+            echo $form->hiddenField($model,'total', array('value'=>$model->total, 'readonly'=>true)); 
             echo $form->hiddenField($model,'labId', array('value'=>$model->labId, 'readonly'=>true)); 
+            echo $form->hiddenField($model,'receivedBy', array('value'=>$model->receivedBy, 'readonly'=>true)); 
 		?>
 	</div>
     
     <div class="span4" style="margin-left:0px!important">
         <div class="row">
             <?php 
-                echo $form->labelEx($model,'requestRefNum', array('label'=>'Duplicate the Service Request'));
-                echo $form->textField($model,'requestRefNum',array('size'=>50, 'maxlength'=>50, 'value'=>$model->requestRefNum, 'readonly'=>true));
-                echo $form->error($model,'requestRefNum'); 
+                echo $form->labelEx($model,'requestRefNum', array('label'=>'Duplicate the SR# '.$model->requestRefNum));
             ?>
         </div>
         <div class="row">
@@ -226,11 +226,10 @@
     <div class="span4" style="margin-left:0px!important">
         <div class="row buttons">
             <?php 
-                echo CHtml::submitButton('Duplicate', array('id'=>'formsubmit','class'=>'btn btn-warning')); 
+                echo CHtml::submitButton('Duplicate', array('class'=>'btn btn-warning')); 
             ?>
         </div>
     </div>
-    
 
     <?php $this->endWidget(); ?>
 </div>

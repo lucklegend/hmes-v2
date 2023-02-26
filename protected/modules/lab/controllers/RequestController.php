@@ -1217,23 +1217,22 @@ class RequestController extends Controller
 
 			if ($newRequest->save()) {
 				// get the samples..
-				$sampleModel = new Sample;
 				$oldSamples = $checkRequest->samps;
 				
 				foreach ($oldSamples as $sample){
-
+					$sampleModel = new Sample;	
 					$sampleModel->request_id = $newRequest->id;
 					$sampleModel->rstl_id = Yii::app()->user->rstlId;
 					$sampleModel->sampleName = $sample->sampleName;
 					$sampleModel->remarks = $sample->remarks;
 					$sampleModel->sampleName = $sample->sampleName;
 					$sampleModel->requestId = $newRequest->requestRefNum;
-					$sampleModel->jobType = $newRequest->jobType;
-					$sampleModel->serial_no = $newRequest->serial_no;
-					$sampleModel->brand = $newRequest->brand;
-					$sampleModel->capacity_range = $newRequest->capacity_range;
-					$sampleModel->resolution = $newRequest->resolution;
-					$sampleModel->model_no = $newRequest->model_no;
+					$sampleModel->jobType = $sample->jobType;
+					$sampleModel->serial_no = $sample->serial_no;
+					$sampleModel->brand = $sample->brand;
+					$sampleModel->capacity_range = $sample->capacity_range;
+					$sampleModel->resolution = $sample->resolution;
+					$sampleModel->model_no = $sample->model_no;
 					$sampleModel->save();
 
 					if ($sampleModel->save()) {
@@ -1258,7 +1257,27 @@ class RequestController extends Controller
 					//get Analyses
 					$getAnalyses = $sample->analyses;
 					if ($getAnalyses && $sample->analysisCount > 0) {
-						$analysis = new Analysis();
+						foreach ($getAnalyses as $analysis) {
+							var_dump($analysis);
+							$newAnalysis = new Analysis;
+							$newAnalysis->rstl_id = Yii::app()->user->rstlId;
+							$newAnalysis->requestId = $analysis->requestId;
+							$newAnalysis->sample_id = $sampleModel->id;
+							$newAnalysis->testName = $analysis->testName;
+							$newAnalysis->method = $analysis->method;
+							$newAnalysis->references = $analysis->references;
+							$newAnalysis->quantity = $analysis->quantity;
+							$newAnalysis->fee = $analysis->fee;
+							$newAnalysis->testId = $analysis->testId;
+							$newAnalysis->analysisMonth = $analysis->analysisMonth;
+							$newAnalysis->analysisYear = $analysis->analysisYear;
+							$newAnalysis->worksheet = $analysis->worksheet;
+							$newAnalysis->save();
+							if ($newAnalysis->save() === true) {
+								echo  'may NaSave na analysis';
+							}
+						}
+						
 					}
 				}
 				// if (Yii::app()->request->isAjaxRequest){

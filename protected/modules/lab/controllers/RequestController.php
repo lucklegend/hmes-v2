@@ -1198,7 +1198,6 @@ class RequestController extends Controller
 		// $this->performAjaxValidation($model);
 		$data = array();
 		if (isset($_GET['id'])) {
-
 			$requestId = $_GET['id'];
 			$checkRequest = $checkRequest->findByPk($requestId);
 			$get_latest_gen_request = $checkRequest->generateRequestRef($checkRequest->labId);
@@ -1217,19 +1216,64 @@ class RequestController extends Controller
 			$newRequest->customerName=customer::model()->findByPk($newRequest->customerId)->customerName;
 
 			if ($newRequest->save()) {
-				if (Yii::app()->request->isAjaxRequest){
-                    echo CJSON::encode(array(
-                        'status' => 'success', 
-                        'div' => "Successfully Duplicate the Service Request"
-                    ));
-                    exit;               
-                } else {
-                    echo CJSON::encode(array(
-                        'status' => 'error',
-                        'div' => "Could not Duplicate"
-                    ));
-                    $this->redirect(array('view','id'=>$newRequest->id));
-                }	
+				// get the samples..
+				$sampleModel = new Sample;
+				$oldSamples = $checkRequest->samps;
+				
+				foreach ($oldSamples as $sample){
+
+					$sampleModel->request_id = $newRequest->id;
+					$sampleModel->rstl_id = Yii::app()->user->rstlId;
+					$sampleModel->sampleName = $sample->sampleName;
+					$sampleModel->remarks = $sample->remarks;
+					$sampleModel->sampleName = $sample->sampleName;
+					$sampleModel->requestId = $newRequest->requestRefNum;
+					$sampleModel->jobType = $newRequest->jobType;
+					$sampleModel->serial_no = $newRequest->serial_no;
+					$sampleModel->brand = $newRequest->brand;
+					$sampleModel->capacity_range = $newRequest->capacity_range;
+					$sampleModel->resolution = $newRequest->resolution;
+					$sampleModel->model_no = $newRequest->model_no;
+					$sampleModel->save();
+
+					if ($sampleModel->save()) {
+						$labCode = Lab::model()->findByPk($newRequest->labId);
+						$year = date('Y', strtotime($newRequest->requestDate));
+						$code = new Samplecode;
+						$tsrNum = $newRequest->requestRefNum;
+						$sampleCode = $code->generateSampleCode2(
+							$labCode,
+							$year,
+							$tsrNum
+						);
+						$number = explode('-', $sampleCode);
+						$generated = $this->checkIfGeneratedSamples($newRequest);
+						if($generated == 0){
+							if ($sample->sampleCode == '') {
+								$this->appendSampleCode($newRequest, $number[1]);
+								Sample::model()->updateByPk($sample->id, array('sampleCode' => $sampleCode));
+							}
+						}
+					}
+					//get Analyses
+					$getAnalyses = $sample->analyses;
+					if ($getAnalyses && $sample->analysisCount > 0) {
+						$analysis = new Analysis();
+					}
+				}
+				// if (Yii::app()->request->isAjaxRequest){
+                //     echo CJSON::encode(array(
+                //         'status' => 'success', 
+                //         'div' => "Successfully Duplicate the Service Request"
+                //     ));
+                //     exit;               
+                // } else {
+                //     echo CJSON::encode(array(
+                //         'status' => 'error',
+                //         'div' => "Could not Duplicate"
+                //     ));
+                //     $this->redirect(array('view','id'=>$newRequest->id));
+                // }	
 			} 
 			else {
 				echo CJSON::encode(array(

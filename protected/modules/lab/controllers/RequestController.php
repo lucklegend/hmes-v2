@@ -1221,12 +1221,19 @@ class RequestController extends Controller
 				
 				foreach ($oldSamples as $sample){
 					$sampleModel = new Sample;	
-					$sampleModel->request_id = $newRequest->id;
 					$sampleModel->rstl_id = Yii::app()->user->rstlId;
+					$sampleModel->sampleCode = $sample->sampleCode;
 					$sampleModel->sampleName = $sample->sampleName;
+					$sampleModel->description = $sample->description;
 					$sampleModel->remarks = $sample->remarks;
-					$sampleModel->sampleName = $sample->sampleName;
 					$sampleModel->requestId = $newRequest->requestRefNum;
+					$sampleModel->request_id = $newRequest->id;			
+					$sampleModel->sampleMonth = date('m', strtotime($newRequest->requestDate));	
+					$sampleModel->sampleYear = date('Y', strtotime($newRequest->requestDate));
+					$sampleModel->cancelled = 0;
+					$sampleModel->pstcsample_id = 0;
+					$sampleModel->sampleType_id = 0;
+					$sampleModel->samplingDate = $sample->samplingDate;
 					$sampleModel->jobType = $sample->jobType;
 					$sampleModel->serial_no = $sample->serial_no;
 					$sampleModel->brand = $sample->brand;
@@ -1258,48 +1265,47 @@ class RequestController extends Controller
 					$getAnalyses = $sample->analyses;
 					if ($getAnalyses && $sample->analysisCount > 0) {
 						foreach ($getAnalyses as $analysis) {
-							var_dump($analysis);
 							$newAnalysis = new Analysis;
 							$newAnalysis->rstl_id = Yii::app()->user->rstlId;
-							$newAnalysis->requestId = $analysis->requestId;
+							$newAnalysis->requestId = $newRequest->requestRefNum;;
 							$newAnalysis->sample_id = $sampleModel->id;
-							$newAnalysis->testName = $analysis->testName;
+							$newAnalysis->sampleCode = $analysis->sampleCode;
+							$newAnalysis->testName = Test::model()->findByPk($analysis->testId)->testName;
 							$newAnalysis->method = $analysis->method;
 							$newAnalysis->references = $analysis->references;
 							$newAnalysis->quantity = $analysis->quantity;
 							$newAnalysis->fee = $analysis->fee;
 							$newAnalysis->testId = $analysis->testId;
-							$newAnalysis->analysisMonth = $analysis->analysisMonth;
-							$newAnalysis->analysisYear = $analysis->analysisYear;
+							$newAnalysis->analysisMonth = date('m', strtotime($newRequest->requestDate));
+							$newAnalysis->analysisYear = date('Y', strtotime($newRequest->requestDate));
 							$newAnalysis->worksheet = $analysis->worksheet;
 							$newAnalysis->save();
 							if ($newAnalysis->save() === true) {
-								echo  'may NaSave na analysis';
+								
 							}
 						}
 						
 					}
 				}
-				// if (Yii::app()->request->isAjaxRequest){
-                //     echo CJSON::encode(array(
-                //         'status' => 'success', 
-                //         'div' => "Successfully Duplicate the Service Request"
-                //     ));
-                //     exit;               
-                // } else {
-                //     echo CJSON::encode(array(
-                //         'status' => 'error',
-                //         'div' => "Could not Duplicate"
-                //     ));
-                //     $this->redirect(array('view','id'=>$newRequest->id));
-                // }	
+				if (Yii::app()->request->isAjaxRequest){
+                    $div = $this->renderPartial('_goToDuplicate', array('model'=>$newRequest), true, true);
+					echo CJSON::encode(array(
+                        'status' => 'success', 
+                        'div' => $div
+                    ));                                   
+                } else {
+                    echo CJSON::encode(array(
+                        'status' => 'error',
+                        'div' => "Could not Duplicate"
+                    ));
+                    $this->redirect(array('view','id'=>$newRequest->id));
+                }	
 			} 
 			else {
 				echo CJSON::encode(array(
                     'status' => 'error',
                     'div' => "Nothing to duplicate"
                 ));
-				// $this->redirect(array('view','id'=>$requestId));
 			}
 			
 		}
@@ -1308,7 +1314,8 @@ class RequestController extends Controller
 			$div = $this->renderPartial('formduplicate', array('model'=>$checkRequest, 'data'=>$data), true, true);
 			echo CJSON::encode(array(
                 'status'=>'failure',
-                'div'=>$div));
+                'div'=>$div
+			));
 			exit;               
 		}else {
 			$this->render('createduplicate',array('model'=>$checkRequest,'data'=>$data));

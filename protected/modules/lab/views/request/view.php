@@ -1215,18 +1215,14 @@
                 'type' => 'post',
                 'dataType' => 'json',
                 'success' => "function(data) {
-                    if (data.status == 'failure') {
+                    if (data.status == 'success') {
+                        $('#dialogDuplicate').html(data.div);
+                    }
+                    else if (data.status == 'failure') {
                         $('#dialogDuplicate').html(data.div);
                         // Here is the trick: on submit-> once again this function!
                         $('#dialogDuplicate form').submit(duplicateRequest);
-                    }
-                    else {
-                        $.fn.yiiGridView.update('sample-grid');
-                        $.fn.yiiGridView.update('analysis-grid');
-                        location.reload();
-                        $('#dialogDuplicate').html(data.div);
-                        setTimeout(\"$('#dialogDuplicate').dialog('close') \",1000);
-                        
+                    } else {
                     }
                 }",
                 'beforeSend' => 'function(jqXHR, settings){

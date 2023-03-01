@@ -169,7 +169,9 @@ class Analysis extends CActiveRecord
 				$this->deleted = 0;
 		        return true;	
 			}else{
-				$this->testName = Test::model()->findByPk($_POST['Analysis']['testName'])->testName;
+				if(isset($_POST['Analysis']['testName'])){
+					$this->testName = Test::model()->findByPk($_POST['Analysis']['testName'])->testName;
+				}
 				return true;
 			}
 	   }

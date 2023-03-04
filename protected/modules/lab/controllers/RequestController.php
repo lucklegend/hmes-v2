@@ -1208,7 +1208,6 @@ class RequestController extends Controller
 		}	
 		
 		if (isset($_POST['Request'])) {
-			echo '<script>console.log("request boi");</script>';
 			$newRequest = new Request;
 			// Create a new Request
 			$newRequest->paymentType=1;
@@ -1288,11 +1287,12 @@ class RequestController extends Controller
 					}
 				}
 				if (Yii::app()->request->isAjaxRequest){
-                    $div = $this->renderPartial('_goToDuplicate', array('model'=>$newRequest), true, true);
 					echo CJSON::encode(array(
-                        'status' => 'success', 
-                        'div' => $div
-                    ));                                   
+                        'status' => 'success',
+						'div' => 'Successfuly Duplicate Service Request Going to the New Service Request',
+                        'id' => $newRequest->id,
+                    ));
+					exit;                                     
                 } else {
                     echo CJSON::encode(array(
                         'status' => 'error',
@@ -1308,18 +1308,18 @@ class RequestController extends Controller
                 ));
 			}
 			
+		} else{
+			if (Yii::app()->request->isAjaxRequest){
+				$div = $this->renderPartial('formduplicate', array('model'=>$checkRequest, 'data'=>$data), true, true);
+				echo CJSON::encode(array(
+					'status'=>'failure',
+					'div'=>$div
+				));
+				exit;               
+			} else {
+				$this->render('createduplicate',array('model'=>$checkRequest,'data'=>$data));
+			}	
 		}
-		
-		if (Yii::app()->request->isAjaxRequest){
-			$div = $this->renderPartial('formduplicate', array('model'=>$checkRequest, 'data'=>$data), true, true);
-			echo CJSON::encode(array(
-                'status'=>'failure',
-                'div'=>$div
-			));
-			exit;               
-		}else {
-			$this->render('createduplicate',array('model'=>$checkRequest,'data'=>$data));
-		}	
     }
 
 	public function actionRemarks(){

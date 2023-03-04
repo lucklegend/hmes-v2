@@ -779,6 +779,7 @@
     <!-- ConfirmGenerateSampleCode Dialog : End -->
     <?php
     $image = CHtml::image(Yii::app()->request->baseUrl . '/images/ajax-loader.gif');
+    $viewRequestURL = $this->createUrl('request/view');
     Yii::app()->clientScript->registerScript('clkrowgrid', "
         $('#sample-grid table tbody tr').live('click',function()
         {
@@ -819,6 +820,39 @@
 
 </div>
 <script type="text/javascript">
+    function duplicateRequest() {
+        <?php   
+            echo CHtml::ajax(array(
+                'url' => $this->createUrl('request/duplicate', array('id' => $model->id)),
+                'data' => "js:$(this).serialize()",
+                'type' => 'post',
+                'dataType' => 'json',
+                'success' => "function(data) {
+                    if (data.status == 'failure'){
+                        $('#dialogDuplicate').html(data.div);
+                        // Here is the trick: on submit-> once again this function!
+                        $('#dialogDuplicate form').submit(duplicateRequest);
+                    }
+                    else{
+                        $('#dialogDuplicate').html(data.div);
+                        setTimeout(\"$('#dialogDuplicate').dialog('close') \",5000);
+                        window.location.href = '".$viewRequestURL."/id/'+data.id;
+                    }
+                }",
+                'beforeSend' => 'function(jqXHR, settings){
+                    $("#dialogDuplicate").html(
+                        \'<div class="loader">'.$image.'<br\><br\>Processing...<br\> Please wait...</div>\'
+                    );
+                }',
+                'error' => "function(request, status, error){
+                    $('#dialogDuplicate').html(status+'('+error+')'+': '+ request.responseText );
+                    console.log(error);
+                }",
+
+            )) 
+        ?>;
+        return false;
+    }
     function cancelRequest() {
         <?php echo CHtml::ajax(array(
             'url' => $this->createUrl('cancelledrequest/create', array('id' => $model->id, 'requestRefNum' => $model->requestRefNum)),
@@ -839,7 +873,7 @@
 	                $.fn.yiiGridView.update('analysis-grid');
 	                location.reload();
 					$('#dialogCancel').html(data.div);
-                    setTimeout(\"$('#dialogSample').dialog('close') \",1000);
+                    setTimeout(\"$('#dialogCancel').dialog('close') \",1000);
 					
                 }
 
@@ -877,7 +911,7 @@
                     //$.fn.yiiGridView.update('sample-grid');
                     //$.fn.yiiGridView.update('analysis-grid');
 					$('#dialogCancel').html(data.div);
-                    setTimeout(\"$('#dialogSample').dialog('close') \",1000);
+                    setTimeout(\"$('#dialogCancel').dialog('close') \",1000);
                 }
             }",
             'beforeSend' => 'function(jqXHR, settings){
@@ -953,15 +987,15 @@
  
             }",
             'beforeSend' => 'function(jqXHR, settings){
-                    $("#dialogBulkSample").html(
-						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
-					);
-             }',
+                $("#dialogBulkSample").html(
+                    \'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
+                );
+            }',
             'error' => "function(request, status, error){
-				 	$('#dialogBulkSample').html(status+'('+error+')'+': '+ request.responseText );
-					}",
-
-        )) ?>;
+                $('#dialogBulkSample').html(status+'('+error+')'+': '+ request.responseText );
+            }",
+        )) 
+        ?>;
         return false;
     }
 
@@ -989,13 +1023,13 @@
                 }
             }",
             'beforeSend' => 'function(jqXHR, settings){
-                    $("#dialogSample").html(
-						\'<div class="loader">' . $image . '<br\><br\>Retrieving record.<br\> Please wait...</div>\'
-					);
+                $("#dialogSample").html(
+                    \'<div class="loader">' . $image . '<br\><br\>Retrieving record.<br\> Please wait...</div>\'
+                );
             }',
             'error' => "function(request, status, error){
-				 	$('#dialogSample').html(status+'('+error+')'+': '+ request.responseText+ ' {'+error.code+'}' );
-					}",
+                $('#dialogSample').html(status+'('+error+')'+': '+ request.responseText+ ' {'+error.code+'}' );
+            }",
         )) ?>;
         return false;
 
@@ -1025,9 +1059,9 @@
 
             }",
             'beforeSend' => 'function(jqXHR, settings){
-                    $("#dialogAnalysis").html(
-						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
-					);
+                $("#dialogAnalysis").html(
+                    \'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
+                );
             }',
             'error' => "function(request, status, error){
                 $('#dialogAnalysis').html(status+'('+error+')'+': '+ request.responseText );
@@ -1065,11 +1099,11 @@
 					);
             }',
             'error' => "function(request, status, error){
-				 	$('#dialogAnalysis').html(status+'('+error+')'+': '+ request.responseText+ ' {'+error.code+'}' );
-					}",
-        )) ?>;
+                $('#dialogAnalysis').html(status+'('+error+')'+': '+ request.responseText+ ' {'+error.code+'}' );
+            }",
+        )) 
+        ?>;
         return false;
-
     }
 
     function addPackage() {
@@ -1093,18 +1127,19 @@
                     setTimeout(\"$('#dialogPackage').dialog('close') \",1000);
 					
                 }
- 
+
             }",
             'beforeSend' => 'function(jqXHR, settings){
-                    $("#dialogPackage").html(
-						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
-					);
-             }',
+                $("#dialogPackage").html(
+                    \'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
+                );
+            }',
             'error' => "function(request, status, error){
-				 	$('#dialogPackage').html(status+'('+error+')'+': '+ request.responseText );
-					}",
+                $('#dialogPackage').html(status+'('+error+')'+': '+ request.responseText );
+            }",
 
-        )) ?>;
+        )) 
+        ?>;
         return false;
     }
 
@@ -1193,13 +1228,12 @@
                     setTimeout(\"$('#dialogRemarks').dialog('close') \",1000);
 					
                 }
-
             }",
             'beforeSend' => 'function(jqXHR, settings){
-                    $("#dialogRemarks").html(
-						\'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
-					);
-         	}',
+                $("#dialogRemarks").html(
+                    \'<div class="loader">' . $image . '<br\><br\>Generating form.<br\> Please wait...</div>\'
+                );
+            }',
             'error' => "function(request, status, error){
                 $('#dialogRemarks').html(status+'('+error+')'+': '+ request.responseText );
                 console.log(error);
@@ -1207,38 +1241,7 @@
         )) ?>;
         return false;
     }
-    function duplicateRequest() {
-        <?php   
-            echo CHtml::ajax(array(
-                'url' => $this->createUrl('request/duplicate', array('id' => $model->id)),
-                'data' => "js:$(this).serialize()",
-                'type' => 'post',
-                'dataType' => 'json',
-                'success' => "function(data) {
-                    if (data.status == 'success') {
-                        $('#dialogDuplicate').html(data.div);
-                    }
-                    else if (data.status == 'failure') {
-                        $('#dialogDuplicate').html(data.div);
-                        // Here is the trick: on submit-> once again this function!
-                        $('#dialogDuplicate form').submit(duplicateRequest);
-                    } else {
-                    }
-                }",
-                'beforeSend' => 'function(jqXHR, settings){
-                    $("#dialogDuplicate").html(
-                        \'<div class="loader">'.$image.'<br\><br\>Processing...<br\> Please wait...</div>\'
-                    );
-                }',
-                'error' => "function(request, status, error){
-                    $('#dialogDuplicate').html(status+'('+error+')'+': '+ request.responseText );
-                    console.log(error);
-                }",
-
-            )) 
-        ?>;
-        return false;
-    }
+    
     function generateSampleCode() {
         <?php
         echo CHtml::ajax(array(

@@ -8,7 +8,6 @@ $this->breadcrumbs=array(
 );
 
 $this->menu=array(
-	array('label'=>'Import Data', 'url'=>array('importData')),
 	array('label'=>'Create Request', 'url'=>array('create')),
 );
 

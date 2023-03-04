@@ -28,6 +28,7 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
 
 	<?php echo $form->errorSummary($model); ?>
 	<?php echo $form->hiddenField($model,'id')?>
+	
 	<div class="span4" style="margin-left:0px!important">
 		<div class="row">
 			<?php 

@@ -19,36 +19,46 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
 
 	<p class="note">Fields with <span class="required">*</span> are required.</p>
 
-	<?php echo $form->errorSummary($model); ?>
-	<?php echo $form->hiddenField($model,'id')?>
+	<?php 
+        echo $form->errorSummary($model);
+        echo $form->hiddenField($model,'id');
+    ?>
 	<div class="row">
-		<?php //echo $form->labelEx($model,'request_id'); ?>
-		<?php echo $form->hiddenField($model,'request_id', array('value'=>$request->id, 'readonly'=>true)); ?>
-		<?php //echo $form->error($model,'request_id'); ?>
+		<?php 
+			echo $form->hiddenField($model,'request_id', array('value'=>$request->id, 'readonly'=>true)); 
+		?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'requestRefNum'); ?>
-		<?php echo $form->textField($model,'requestRefNum',array('size'=>50,'maxlength'=>50, 'value'=>$request->requestRefNum, 'readonly'=>true)); ?>
-		<?php echo $form->error($model,'requestRefNum'); ?>
+		<?php 
+            echo $form->labelEx($model,'requestRefNum');
+            echo $form->textField($model,'requestRefNum',array('size'=>50,'maxlength'=>50, 'value'=>$request->requestRefNum, 'readonly'=>true));
+            echo $form->error($model,'requestRefNum'); 
+        ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'reason'); ?>
-		<?php echo $form->textArea($model,'reason',array('size'=>50,'maxlength'=>50, 'readonly'=>$model->isNewRecord ? false : true)); ?>
-		<?php echo $form->error($model,'reason'); ?>
+		<?php 
+            echo $form->labelEx($model,'reason');
+            echo $form->textArea($model,'reason',array('size'=>50,'maxlength'=>50, 'readonly'=>$model->isNewRecord ? false : true));
+            echo $form->error($model,'reason'); 
+        ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'cancelDate'); ?>
-		<?php echo $form->textField($model,'cancelDate', array('value'=>$model->isNewRecord ? date('Y-m-d') : date('Y-m-d', strtotime($model->cancelDate)), 'readonly'=>true)); ?>
-		<?php echo $form->error($model,'cancelDate'); ?>
+		<?php 
+            echo $form->labelEx($model,'cancelDate');
+            echo $form->textField($model,'cancelDate', array('value'=>$model->isNewRecord ? date('Y-m-d') : date('Y-m-d', strtotime($model->cancelDate)), 'readonly'=>true));
+            echo $form->error($model,'cancelDate'); 
+        ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'cancelledBy'); ?>
-		<?php echo $form->textField($model,'cancelledBy', array('value'=>Users::model()->findByPk($model->isNewRecord ? Yii::app()->getModule('user')->user()->id : $model->cancelledBy)->getFullname(), 'readonly'=>true)); ?>
-		<?php echo $form->error($model,'cancelledBy'); ?>
+		<?php 
+            echo $form->labelEx($model,'cancelledBy');
+		    echo $form->textField($model,'cancelledBy', array('value'=>Users::model()->findByPk($model->isNewRecord ? Yii::app()->getModule('user')->user()->id : $model->cancelledBy)->getFullname(), 'readonly'=>true));
+		    echo $form->error($model,'cancelledBy'); 
+        ?>
 	</div>
 
 	<div class="row buttons">

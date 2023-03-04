@@ -257,7 +257,6 @@ class Request extends CActiveRecord
         $tmp = '<div class="raw2">';
         foreach ($collections as $collection) {
             $tmp = $tmp.$collection->receipt->receiptDate.'  ';
-           
         }
         $tmp = $tmp.'</div>';
         return $tmp;
@@ -379,64 +378,56 @@ class Request extends CActiveRecord
 		return $this->remarks;
 	}
 	public function beforeSave(){
-	   if(parent::beforeSave())
-	   {
-			if($this->isNewRecord){
-				if(!$this->import){
-					$this->rstl_id = Yii::app()->Controller->getRstlId();
-					$this->requestRefNum = Request::generateRequestRef($this->labId);
-					$this->requestDate = date('Y-m-d',strtotime($this->requestDate));
-					$this->reportDue = date('Y-m-d',strtotime($this->reportDue));
-					$this->cancelled = 0;
-					if($this->remarks == ''){
-						$this->remarks = 'None';
-					}
-				}
-				return true;
-			}else{
-				$this->requestDate = date('Y-m-d',strtotime($this->requestDate));
-				$this->reportDue = date('Y-m-d',strtotime($this->reportDue));
-				return true;
-			}
-	   }
-	   return false;
+        if(parent::beforeSave()) {
+            if($this->isNewRecord) {
+                if(!$this->import) {
+                    $this->rstl_id = Yii::app()->Controller->getRstlId();
+                    $this->requestRefNum = Request::generateRequestRef($this->labId);
+                    $this->requestDate = date('Y-m-d',strtotime($this->requestDate));
+                    $this->reportDue = date('Y-m-d',strtotime($this->reportDue));
+                    $this->cancelled = 0;
+                    if($this->remarks == ''){
+                        $this->remarks = 'None';
+                    }
+                }
+                return true;
+            }
+            else {
+                $this->requestDate = date('Y-m-d',strtotime($this->requestDate));
+                $this->reportDue = date('Y-m-d',strtotime($this->reportDue));
+                return true;
+            }
+        }
+        return false;
 	}
 	
 	protected function afterSave(){
 		parent::afterSave();
-		if($this->isNewRecord){
-			if(!$this->import){
+		if ($this->isNewRecord) {
+			if (!$this->import) {
 				$requestCode = new Requestcode;
-				 
 				$requestCode->requestRefNum = $this->requestRefNum;
 				$requestCode->rstl_id = Yii::app()->getModule('user')->user()->profile->getAttribute('pstc');
 				$requestCode->labId = $this->labId;
 				$codeArray = explode('-',$this->requestRefNum);
-				
-				/** Old Code: 012014-M-0001-R9 **/
-				//$requestCode->number = $codeArray[2];
-				
-				 /** New Code: R9-092014-CHE-0343 **/
 				$requestCode->number = $codeArray[3];
-				
 				$requestCode->year = date('Y', strtotime($this->requestDate));
 				$requestCode->cancelled = 0;
 				$requestCode->save();
 			}
-		}else{
+		}
+        else {
 			$this->updateRequestTotal($this->id);
 		}
 	}
 	
-	function generateRequestRef($lab){
-		$date = date('Y-m', strtotime($this->requestDate));
-		$year = date('Y', strtotime($this->requestDate));
-		$month = date('m',strtotime($this->requestDate));
+	function generateRequestRef($lab) {
+		$year = date('Y');
 		$request = Request::model()->find(array(
-   			'select'=>'requestRefNum, rstl_id, labId, requestDate', 
-			'order'=>'create_time DESC, id DESC',
-    		'condition'=>'rstl_id = :rstl_id AND labId = :labId AND YEAR(requestDate) = :year',
-    		'params'=>array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $lab, ':year' => $year )
+            'select' => 'requestRefNum, rstl_id, labId, requestDate', 
+			'order' => 'create_time DESC, id DESC',
+    		'condition' => 'rstl_id = :rstl_id AND labId = :labId AND YEAR(requestDate) = :year',
+    		'params' => array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $lab, ':year' => $year )
 		));
 		
 		if(isset($request)){
@@ -455,10 +446,7 @@ class Request extends CActiveRecord
 		}
 		
 		$labCode = Lab::model()->findByPk($lab);
-		// $rstl = Rstl::model()->findByPk(Yii::app()->Controller->getRstlId());
-		// $requestRefNo = $rstl->code.'-'.$labCode->labCode.'-'.$date.'-'.$number;
 		$rstl = 'HME';
-		// $requestRefNo = $rstl.$year.'-'.$labCode->labCode.'-'.$month.'-'.$number;
 		$requestRefNo = $rstl.$year.'-'.$labCode->labCode.'-'.$number;
 
 		return $requestRefNo;
@@ -478,11 +466,10 @@ class Request extends CActiveRecord
 	public function updateRequestTotal($id){
 		$total = 0;
 		$request = Request::model()->findByPk($id);
-		foreach($request->anals as $analysis)
-		{
+		foreach($request->anals as $analysis) {
 			$total = $total + $analysis->fee;
 		}
-			$total = $total + $request->inplant_charge + $request->additional;
+		$total = $total + $request->inplant_charge + $request->additional;
 		
 		if($request->disc)
 			$total = $total - ($total * $request->disc->rate/100);
@@ -618,7 +605,7 @@ class Request extends CActiveRecord
 		return $reqs;
 	}
 	
- 	public function getColor() {
+    public function getColor() {
         
         $statuscolor='active';
         switch ($this->cancelled) {
@@ -630,9 +617,7 @@ class Request extends CActiveRecord
         
     }
     
-    public function getPaymentDetails(){
-    	$request = Request::model()->findByPk($this->id);
-    	
+    public function getPaymentDetails() {   	
     	$balance = $this->total - $this->collection;
     	
 	    switch ($balance) {
@@ -646,8 +631,7 @@ class Request extends CActiveRecord
     	//return Yii::app()->format->formatNumber($balance);
     }
     
-    public function checkInitializeCode($lab)
-    {
+    public function checkInitializeCode($lab) {
     	$code = Initializecode::model()->find(array(
     		'condition'=>'rstl_id=:rstl_id AND lab_id=:labId AND codeType = 1 AND active = 1',
     		'params'=>array(':rstl_id' => Yii::app()->user->rstlId, ':labId' => $lab)
@@ -668,8 +652,7 @@ class Request extends CActiveRecord
 		return $initializeCode;
     }
     
-	public function getStatus()
-	{
+	public function getStatus() {
 		$reportDue=strtotime($this->reportDue);
 		$now=time();
 		
@@ -688,8 +671,7 @@ class Request extends CActiveRecord
 		return array('id'=>1, 'label'=>'Completed', 'class'=>'alert gray alert-success');
 	}
     
-	public function getPaymentStatus()
-	{
+	public function getPaymentStatus() {
 		$receipts=$this->receipts;
 		$balance=$this->getBalance($this->total, $this->collection);
 		
@@ -703,16 +685,14 @@ class Request extends CActiveRecord
 		return array('id'=>0, 'label'=>'Unpaid', 'class'=>'payment alert-danger');
 	}
     
-  	public function getReportStatus()
-	{
+    public function getReportStatus() {
 		if(count($this->testreports) == 0)
 			return array('id'=>0, 'label'=>'None', 'class'=>'payment alert-warning');
 		else
             return array('id'=>1, 'label'=>'View', 'class'=>'payment alert-success');
 	}
 
-	public static function listDataUnpaid($model=NULL, $customer_id)
-	{
+	public static function listDataUnpaid($model=NULL, $customer_id) {
 		$criteria=new CDbCriteria;
 		$criteria->select='id,requestRefNum,total,labId';
 		$criteria->condition='rstl_id = :rstl_id AND t.cancelled=0 AND customerId = :customerId';
@@ -722,7 +702,7 @@ class Request extends CActiveRecord
 		if($requests){
 			foreach ($requests as $request){
 				$balance=$request->getBalance();
-				if($balance!=0 OR ($model->request_id==$request->id)){ //$model->request_id==$request->id --> needed on update
+				if($balance!=0 OR ($model->request_id==$request->id)) { //$model->request_id==$request->id --> needed on update
 					$list[] = array(
 					'id'=>$request->id,
 					'requestRefNum'=>$request->requestRefNum,
@@ -730,7 +710,7 @@ class Request extends CActiveRecord
 					'balance'=>$balance
 					);
 				}
-	    	}
+            }
 		}
 
 		return CHtml::listData($list, 'requestRefNum', 'requestRefNum', 'labId');
@@ -764,6 +744,7 @@ class Request extends CActiveRecord
 		$html .= '</table>';
 		return $html;
 	}
+
 	public function countCustomersByYearMonth($fromDate, $toDate, $requestDate, $custypeId, $labId, $rstlId)
 	{	
 		//initial load set date
@@ -798,8 +779,7 @@ class Request extends CActiveRecord
 	
 	public $totalFee;
 	//function for the sum of gross income per month by year
-	public function sumGrossIncome($fromDate, $toDate, $requestDate, $labId, $rstlId)
-	{
+	public function sumGrossIncome($fromDate, $toDate, $requestDate, $labId, $rstlId) {
 		//initial load set date
 		if(empty($fromDate) && empty($toDate))
 		{
@@ -845,11 +825,9 @@ class Request extends CActiveRecord
 	
 	public $totalIncomeGen;
 	//function for the sum of total income generated per month by year
-	public function incomeGenerated($fromDate, $toDate, $requestDate, $labId, $custypeId, $rstlId)
-	{
+	public function incomeGenerated($fromDate, $toDate, $requestDate, $labId, $custypeId, $rstlId) {
 		//initial load set date
-		if(empty($fromDate) && empty($toDate))
-		{
+		if(empty($fromDate) && empty($toDate)) {
 			//$labId = 1;
 			$fromDate = date('Y-01-01'); //first day of the year
 			$toDate = date('Y-m-d'); //as of today
@@ -857,8 +835,8 @@ class Request extends CActiveRecord
 			
 		}
 		
-		$years = date("Y", strtotime($requestDate)); //get years only
-		$months = date("m", strtotime($requestDate)); //get months only
+		$years = date("Y", strtotime($requestDate));
+		$months = date("m", strtotime($requestDate));
 		
 		$criteria = new CDbCriteria;
 		$criteria->select = 'sum(t.total) AS totalIncomeGen'; //totalIncomeGen declared as virtual attribute
@@ -875,16 +853,16 @@ class Request extends CActiveRecord
 		
 		$totIncomeGenerated = $incomeGen->totalIncomeGen;
 		
-		if($totIncomeGenerated == 0){
+		if($totIncomeGenerated == 0) {
 			return $totIncomeGenerated = '0.00';
-		} else {
+		} 
+        else {
 			return $totIncomeGenerated;
 		}
 	}
 
 	//function for the subtotal of customers by year
-	public function subTotalCustomers($fromDate, $toDate, $requestDate, $labId, $custypeId, $rstlId)
-	{	
+	public function subTotalCustomers($fromDate, $toDate, $requestDate, $labId, $custypeId, $rstlId) {	
 		$years = date("Y", strtotime($requestDate)); //get years only
 		
 		$criteria = new CDbCriteria;
@@ -894,7 +872,6 @@ class Request extends CActiveRecord
 		
 		$countCustomers=$this->with(array(
 			'customersA' => array(
-					//'condition' => "customersA.typeId = '$custypeId'"
 					'condition' => 'customersA.typeId =:custypeId AND customersA.rstl_id =:rstlId',
 					'params' => array(':custypeId'=>$custypeId,':rstlId'=>$rstlId)
 				)
@@ -1055,10 +1032,8 @@ class Request extends CActiveRecord
 	//public $totalDiscounts;
 	//public $totalGratis;
 	
-	public function getTotalIncomeCollections($fromDate, $toDate, $labId, $rstlId)
-	{
-		if(empty($labId) && empty($fromDate) && empty($toDate))
-		{
+	public function getTotalIncomeCollections($fromDate, $toDate, $labId, $rstlId) {
+		if(empty($labId) && empty($fromDate) && empty($toDate)) {
 			$labId = 1;
 			$fromDate = date('Y-01-01'); //first day of the year
 			$toDate = date('Y-m-d'); //as of today
@@ -1146,15 +1121,14 @@ class Request extends CActiveRecord
 		
 		$totalIncome = $totGross - ($totDiscount + $totGratis);
 		
-		if($totalIncome == 0){
+		if($totalIncome == 0) {
 			return '';
 		} else {
 			return $totalIncome;
 		}
 	}
 	
-	public function subTotalIncomeCollections($fromDate, $toDate, $requestDate, $labId, $rstlId)
-	{
+	public function subTotalIncomeCollections($fromDate, $toDate, $requestDate, $labId, $rstlId) {
 		//Request::model()->subTotalIncomeCollections(Yii::app()->Controller->subTotalFromDate(),Yii::app()->Controller->subTotalToDate(),$data["requestDate"],'.$labId.',Yii::app()->Controller->getRstlId())
 		$subTotIncome = Request::model()->subTotalIncome($fromDate,$toDate,$requestDate,1,$labId,$rstlId);
 		$subTotAssistedN = Analysis::model()->subTotalAssisted($fromDate,$toDate,$requestDate,2,$labId,$rstlId);
@@ -1169,8 +1143,7 @@ class Request extends CActiveRecord
 		return $totalGenerated;
 	}
 	
-	public function getIncomeCollected($fromDate, $toDate, $requestDate, $labId, $rstlId)
-	{
+	public function getIncomeCollected($fromDate, $toDate, $requestDate, $labId, $rstlId) {
 		
 		$gross = Request::model()->sumGrossIncome($fromDate,$toDate,$requestDate, $labId, $rstlId);
 		$gratisNsetup = Analysis::model()->sumValueAssist($fromDate,$toDate,$requestDate,$custype = 2,$labId,$rstlId);
@@ -1185,8 +1158,7 @@ class Request extends CActiveRecord
 		
 	}
     
-    public function dailySampleCount($requestDate, $labId)
-    {
+    public function dailySampleCount($requestDate, $labId) {
         $criteria = new CDbCriteria;
             
         $criteria->condition = 'requestDate = :requestDate AND labId = :labId AND t.cancelled = :cancelled';
@@ -1201,8 +1173,7 @@ class Request extends CActiveRecord
         return $dailySamples;
     }
     
-    public function dailyAnalysisCount($requestDate, $labId)
-    {
+    public function dailyAnalysisCount($requestDate, $labId) {
         $criteria = new CDbCriteria;
             
         $criteria->condition = 'requestDate = :requestDate AND labId = :labId AND t.cancelled = :cancelled';
@@ -1218,9 +1189,9 @@ class Request extends CActiveRecord
         return $dailyAnalysis;
     }
 
-    public function perAnalysisCount($requestRefNum){
-    	$criteria = new CDbCriteria;
-            
+    public function perAnalysisCount($requestRefNum) {
+        $criteria = new CDbCriteria;
+        
         $criteria->condition = 'requestId = :requestRefNum AND sampleCode <> :sampleCode AND cancelled = :cancelled AND deleted = :deleted';
         $criteria->params = array(':cancelled'=>0, ':deleted'=>0, ':sampleCode'=>'', ':requestRefNum'=>$requestRefNum);
         $analyses = Analysis::model()->findAll($criteria);
@@ -1233,9 +1204,9 @@ class Request extends CActiveRecord
         return $dailyAnalysis;
     }
 
-    public function perSampleCount($requestRefNum){
-    	 $criteria = new CDbCriteria;
-            
+    public function perSampleCount($requestRefNum) {
+        $criteria = new CDbCriteria;
+        
         $criteria->condition = 'requestId = :requestRefNum AND sampleCode <> :sampleCode AND cancelled = :cancelled';
         $criteria->params = array(':cancelled'=>0, ':sampleCode'=>'', ':requestRefNum'=>$requestRefNum);
         $samples = Sample::model()->findAll($criteria);
@@ -1248,35 +1219,38 @@ class Request extends CActiveRecord
         return $dailyAnalysis;
     }
     
-    public function perDiscounted($fee,$discount,$requestRefNum){
-    	 
-       	if($discount != 0){
-       		$criteria = new CDbCriteria;
-       		$criteria->condition = 'id = :discountId';
-        	$criteria->params = array(':discountId' => $discount);
-	       	$discountRate = Discount::model()->find($criteria);
-	       	
-	       	if(isset($discountRate)){
-	       		$remaining = 100 - $discountRate->rate;
-		        $discount_rate = $remaining / 100;
-		        $orig = $fee / $discount_rate;
-		        $discounted = $orig-$fee;
-	       	}
-	       	if($discount == 9){
-       			$criteria = new CDbCriteria;
-		        $criteria->condition = 'requestId = :requestRefNum AND sampleCode <> :sampleCode AND cancelled = :cancelled AND deleted = :deleted';
-		        $criteria->params = array(':cancelled'=>0, ':deleted'=>0, ':sampleCode'=>'', ':requestRefNum'=>$requestRefNum);
-		        $analyses = Analysis::model()->findAll($criteria);
-		        
-		        $dailyAnalysis = 0;
-		        foreach($analyses as $analysis){
-		                $dailyAnalysis = $dailyAnalysis+$analysis->fee;
-		        }
-		        $discounted = $dailyAnalysis;
-       		}
-       	}else{
-       		$discounted = "0";
-       	}
+    public function perDiscounted($fee,$discount,$requestRefNum) {
+
+        if($discount != 0) {
+            $criteria = new CDbCriteria;
+            $criteria->condition = 'id = :discountId';
+            $criteria->params = array(':discountId' => $discount);
+            $discountRate = Discount::model()->find($criteria);
+
+            if(isset($discountRate)) {
+                $remaining = 100 - $discountRate->rate;
+                $discount_rate = $remaining / 100;
+                $orig = $fee / $discount_rate;
+                $discounted = $orig-$fee;
+            }
+
+            if($discount == 9) {
+                $criteria = new CDbCriteria;
+                $criteria->condition = 'requestId = :requestRefNum AND sampleCode <> :sampleCode AND cancelled = :cancelled AND deleted = :deleted';
+                $criteria->params = array(':cancelled'=>0, ':deleted'=>0, ':sampleCode'=>'', ':requestRefNum'=>$requestRefNum);
+                $analyses = Analysis::model()->findAll($criteria);
+
+                $dailyAnalysis = 0;
+                foreach($analyses as $analysis) {
+                    $dailyAnalysis = $dailyAnalysis+$analysis->fee;
+                }
+                $discounted = $dailyAnalysis;
+            }
+        } 
+        else {
+            $discounted = "0";
+        }
         return $discounted;
     }
+
 }

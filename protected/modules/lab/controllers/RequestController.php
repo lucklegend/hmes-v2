@@ -53,7 +53,7 @@ class RequestController extends Controller
 	public function actionView($id)
 	{
 		
-		$model=$this->loadModel($id);
+		$model = $this->loadModel($id);
 		
 		$sampleDataProvider = new CArrayDataProvider($model->samps, 
 			array(
@@ -78,42 +78,23 @@ class RequestController extends Controller
 		));
 	}
 	
-	/** Previous logic for function "checkIfGeneratedSamples" : Start **/
-	/* function checkIfGeneratedSamples($request)
-	{
-		$lastGenerated = Generatedrequest::model()->find(array(
-			'order'=>'id DESC',
-			//'limit'=>1, //not needed with find()
-    		'condition'=>'rstl_id=:rstl_id AND labId=:labId AND year=:year',
-    		'params'=>array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $request->labId, ':year' => date('Y', strtotime($request->requestDate)))
-		));	
-		
-		$currentRequest = Requestcode::model()->find(array(
-    		'condition'=>'rstl_id=:rstl_id AND requestRefNum=:requestRefNum',
-    		'params'=>array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':requestRefNum' => $request->requestRefNum)
-		));	
-		
-		return ($currentRequest->number - $lastGenerated->number);
-	} */
-	/** Previous logic for function "checkIfGeneratedSamples" : End **/
-	
 	function checkIfGeneratedSamples($request)
 	{
 	$generatedThisRequest = Generatedrequest::model()->count(array(
-    		'condition'=>'request_id =:request_id',
-    		'params'=>array(':request_id'=>$request->id)
-		));
+		'condition'=>'request_id =:request_id',
+		'params'=>array(':request_id'=>$request->id)
+	));
 
 	$previousRequest = Request::model()->find(array(
-				'order'=>'id DESC',
-	    		'condition'=>'id<:id AND rstl_id=:rstl_id AND labId=:labId',
-	    		'params'=>array(':id'=>$request->id, ':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $request->labId)
-			));	
+		'order'=>'id DESC',
+		'condition'=>'id<:id AND rstl_id=:rstl_id AND labId=:labId',
+		'params'=>array(':id'=>$request->id, ':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $request->labId)
+	));	
 	
 	$generatedPreviousRequest = Generatedrequest::model()->count(array(
-	    		'condition'=>'request_id =:request_id',
-	    		'params'=>array(':request_id'=>$previousRequest->id)
-			));
+		'condition'=>'request_id =:request_id',
+		'params'=>array(':request_id'=>$previousRequest->id)
+	));
 						
 	switch ($generatedThisRequest) {
 		case (0):
@@ -201,37 +182,32 @@ class RequestController extends Controller
 
 	public function actionDelete($id)
 	{
-		if(Yii::app()->request->isPostRequest)
-		{
-			$getRequestRefNum = $this->loadModel($id);
-			$requestRef = $getRequestRefNum->requestRefNum;
+		if(Yii::app()->request->isPostRequest){
+			$model = $this->loadModel($id);
+			$requestRef = $model->requestRefNum;
 
-			$deletesample = Sample::model()->deleteAll(array(
+			Sample::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
 			));
 			
-			$deleteAnalysis = Analysis::model()->deleteAll(array(
+			Analysis::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
 			));
 			
-			$deleteGenReq = Generatedrequest::model()->deleteAll(array(
+			Generatedrequest::model()->deleteAll(array(
 				'condition'=> 'request_id = :request_id',
 				'params' => array(':request_id'=>$id),
 			));	
 			
-			$deletesamplecode = Samplecode::model()->deleteAll(array(
+			Samplecode::model()->deleteAll(array(
 				'condition'=> 'requestId = :request_id',
 				'params' => array(':request_id'=>$requestRef),
-			));	
-			
-			// we only allow deletion via POST request
-			$this->loadModel($id)->delete();
-			
-	 		
-			if(!isset($_GET['ajax']))
-				$this->redirect(array('index'));
+			));
+
+            if($model->delete())
+				$this->redirect(array('admin'));
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
@@ -274,37 +250,6 @@ class RequestController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		/** 
-		 * Do not delete
-		 *
-			$requestCodes = Requestcode::model()->findAll();
-			foreach($requestCodes as $requestCode){
-				$generatedRequest = New Generatedrequest;
-				$generatedRequest->request_id = $requestCode->id;
-				$generatedRequest->labId = $requestCode->labId;
-				$generatedRequest->year = $requestCode->year;
-				$generatedRequest->number = $requestCode->number;
-				$generatedRequest->save();
-			}
-		**/
-		/*
-		$analysisDeleted = Analysis::model()->findAll(array(
-					'condition' => 'cancelled = :cancelled OR deleted = :deleted',
-				    'params' => array(':cancelled' => 1,':deleted' => 1),
-				));
-		
-				
-		foreach($analysisDeleted as $analysis)
-		{
-			Analysis::model()->updateByPk($analysis->id, 
-			array(
-				'fee'=>0,
-				'cancelled'=>1,
-				'deleted'=>1,
-			));
-		}
-		*/
-
  		// page size drop down changed
         if (isset($_GET['pageSize'])) {
             Yii::app()->user->setState('pageSize',(int)$_GET['pageSize']);
@@ -316,15 +261,7 @@ class RequestController extends Controller
 		if(isset($_GET['Request']))
 			$model->attributes=$_GET['Request'];
 		
-		//$requestcodeExist = $this->checkRequestCodes($this->getRstlId());	
-		
-		//if($requestcodeExist){
 			$dataProvider=new CActiveDataProvider($model, array(
-			    /*'criteria'=>array(
-			        'condition'=>'cancelled=0',
-			        //'order'=>'requestRefNum DESC',
-			        //'with'=>array('customer'),
-			    ),*/
 			    'pagination'=>array(
 			        'pageSize'=>20,
 			    ),
@@ -332,11 +269,7 @@ class RequestController extends Controller
 	
 			$this->render('admin',array(
 				'model'=>$model, 'customers'=>$dataProvider,
-				//'requestcodeExist'=>$requestcodeExist
 			));
-		/*}else{
-			$this->redirect($this->createUrl('requestcode/create'),array());
-		}*/
 	}
 
 	public function actionImportData()
@@ -460,14 +393,14 @@ class RequestController extends Controller
             	if($requestCol == '' AND $sampleCol != '' AND $analysisCol != ''){
             		$trimText = '(Id: '.$objWorksheet->getCellByColumnAndRow(16, $row)->getCalculatedValue().')';
             		$analysis = array(
-            				//'sample_id' => $objWorksheet->getCellByColumnAndRow(10, $row)->getValue(),
-            				'sampleCode' => $objWorksheet->getCellByColumnAndRow(14, $sampleRow)->getValue(),
-            				'testId' => $objWorksheet->getCellByColumnAndRow(16, $row)->getCalculatedValue(),
-            				'testName' =>rtrim($objWorksheet->getCellByColumnAndRow(15, $row)->getValue(), $trimText),
-            				'method' => $objWorksheet->getCellByColumnAndRow(17, $row)->getCalculatedValue(),
-            				'references' => $objWorksheet->getCellByColumnAndRow(18, $row)->getCalculatedValue(),
-            				'quantity' => 1,
-            				'fee' => $objWorksheet->getCellByColumnAndRow(19, $row)->getCalculatedValue(),
+						//'sample_id' => $objWorksheet->getCellByColumnAndRow(10, $row)->getValue(),
+						'sampleCode' => $objWorksheet->getCellByColumnAndRow(14, $sampleRow)->getValue(),
+						'testId' => $objWorksheet->getCellByColumnAndRow(16, $row)->getCalculatedValue(),
+						'testName' =>rtrim($objWorksheet->getCellByColumnAndRow(15, $row)->getValue(), $trimText),
+						'method' => $objWorksheet->getCellByColumnAndRow(17, $row)->getCalculatedValue(),
+						'references' => $objWorksheet->getCellByColumnAndRow(18, $row)->getCalculatedValue(),
+						'quantity' => 1,
+						'fee' => $objWorksheet->getCellByColumnAndRow(19, $row)->getCalculatedValue(),
             		);
             		$requestCount = count($importData) - 1;
             		$sampleCount = count($importData[$requestCount]['samples']) - 1;
@@ -485,10 +418,10 @@ class RequestController extends Controller
 		//$has_duplicate = true;
 		
 		$this->render('importData',array(
-			'file_path'=>$file_path,
-			'importDataProvider'=>$importDataProvider, 
-			'importData'=>$arr,
-			'data'=>$data,
+			'file_path' => $file_path,
+			'importDataProvider' => $importDataProvider, 
+			'importData' => $arr,
+			'data' => $data,
 			'has_duplicate'=>$this->checkExistingRequests($arr)
 		));
 	}
@@ -1086,9 +1019,9 @@ class RequestController extends Controller
 			if(count($count) <= 0){
 				$analysesCount--;
 			}
-			 foreach($sample->analyses as $analysis){
-			 	$subTotal = $subTotal + $analysis->fee;
-			 }
+			foreach($sample->analyses as $analysis){
+				$subTotal = $subTotal + $analysis->fee;
+			}
 		}
 		if($analysesCount != $allSamplesCount){
 			$this->redirect(array('request/view','id'=>$id, 'error_msg'=>1));
@@ -1117,20 +1050,20 @@ class RequestController extends Controller
 		$pdf = Yii::createComponent('application.extensions.tcpdf.requestPdf2', 'P', 'cm', 'A4', true, 'UTF-8');
 		$pdf = new requestPdf2(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         spl_autoload_register(array('YiiBase','autoload'));
- 
- 		$pdf->setRequest($request);
+
+        $pdf->setRequest($request);
         $pdf->SetCreator(PDF_CREATOR);  
         $pdf->SetTitle($request->requestRefNum);               
         $pdf->SetMargins(0,87.15,0);
         $pdf->SetAutoPageBreak(TRUE, 60);
         
         $pdf->AddPage();
- 
+
         $pdf->printRows();
         
         // reset pointer to the last page
         $pdf->lastPage();
- 
+
         //Close and output PDF document
         $pdf->Output($request->requestRefNum.'.pdf', 'I');
         //Yii::app()->end();
@@ -1141,9 +1074,9 @@ class RequestController extends Controller
 		$request = Request::model()->findByPk($id);
 		$subTotal =0;
 		foreach($request->samps as $sample){
-			 foreach($sample->analyses as $analysis){
-			 	$subTotal = $subTotal + $analysis->fee;
-			 }
+			foreach($sample->analyses as $analysis){
+				$subTotal = $subTotal + $analysis->fee;
+			}
 		}
 		$discount = $subTotal * $request->disc->rate/100;
         $inplantcharge = $request->inplant_charge;
@@ -1172,47 +1105,40 @@ class RequestController extends Controller
 			$datas['id'] = $requestId;
 			$datas['inplant_charge'] = $model->inplant_charge;
 		}
-		//var_dump($datas);
 		if(isset($_POST['Request'])){
 			$post = Request::model()->findByPk($requestId);
 			$post->inplant_charge = $_POST['Request']['inplant_charge'];
-			//echo $post->inplant_charge;
 			$post->update();
-			var_dump($post->update());
 
 			if($post->update() === true){
 				if (Yii::app()->request->isAjaxRequest){
 	                echo CJSON::encode(array(
 	                    'status'=>'success', 
-	                    'div'=>"In-Plant Charge successfully added"
+	                    'div'=>"On-site Charge successfully added"
 	                    ));
-	                echo "save";
 	                exit;               
 	            }else{
 	            	echo CJSON::encode(array(
 	            		'status'=>'error',
-	            		'div'=>"Could not save"
+	            		'div'=>"Could not update On-site charge"
 	        		));
 	            	$this->redirect(array('view','id'=>$requestId));
 	            }	
 			}else{
-				echo CJSON::encode(array(
-	           		'status'=>'error',
-	           		'div'=>"Nothing to save"
-	        	));
+				echo CJSON::encode(array('status'=>'error','div'=>"Nothing to save"));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			// $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
-	  //       echo CJSON::encode(array(
-	  //           'status'=>'failure',
-	  //           'div'=>$div));
-			$this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
+			$div = $this->renderPartial('forminplantcharge', array('model'=>$model, 'datas'=>$datas), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div' => $div));
 	        exit;               
 	    }else{
-	        $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
+	        $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
 	    }		
 	}
+
 	public function actionAdditional(){
 		$model = new Request;
 		$datas = array();
@@ -1228,41 +1154,173 @@ class RequestController extends Controller
 			$post->additional = $_POST['Request']['additional'];
 			//echo $post->inplant_charge;
 			$post->update();
-			var_dump($post->update());
-
-			if($post->update() === true){
-				if (Yii::app()->request->isAjaxRequest){
-	                echo CJSON::encode(array(
-	                    'status'=>'success', 
-	                    'div'=>"Additional Charge successfully added"
-	                    ));
-	                echo "save";
-	                exit;               
-	            }else{
-	            	echo CJSON::encode(array(
-	            		'status'=>'error',
-	            		'div'=>"Could not save"
-	        		));
-	            	$this->redirect(array('view','id'=>$requestId));
-	            }	
-			}else{
+			if($post->update()){
+				if (Yii::app()->request->isAjaxRequest) {
+                    echo CJSON::encode(array(
+                        'status'=>'success', 
+                        'div'=>"Additional Charge successfully added"
+                    ));
+                    exit;               
+                } else {
+                    echo CJSON::encode(array(
+                        'status'=>'error',
+                        'div'=>"Could not update additional"
+                    ));
+                    $this->redirect(array('view','id'=>$requestId));
+                }	
+			} else {
 				echo CJSON::encode(array(
-	           		'status'=>'error',
-	           		'div'=>"Nothing to save"
-	        	));
+                    'status'=>'error',
+                    'div'=>"Nothing to update"
+                ));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			// $div = $this->renderPartial('forminplantcharge',array('model'=>$model, 'datas'=>$datas));
-	  //       echo CJSON::encode(array(
-	  //           'status'=>'failure',
-	  //           'div'=>$div));
-			$this->renderPartial('formadditional',array('model'=>$model, 'datas'=>$datas));
+			$div = $this->renderPartial('formadditional', array('model'=>$model, 'datas'=>$datas), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div' => $div));
 	        exit;               
-	    }else{
-	        $div = $this->renderPartial('formadditional',array('model'=>$model, 'datas'=>$datas));
-	    }		
+	    } else {
+			$this->render('createadditional',array('model'=>$model,'datas'=>$datas));
+		}		
 	}
+
+	/**
+     * Updates a particular model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id the ID of the model to be updated
+     */
+    public function actionDuplicate()
+    {
+		$checkRequest = new Request;
+		// Uncomment the following line if AJAX validation is needed
+		// $this->performAjaxValidation($model);
+		$data = array();
+		if (isset($_GET['id'])) {
+			$requestId = $_GET['id'];
+			$checkRequest = $checkRequest->findByPk($requestId);
+			$get_latest_gen_request = $checkRequest->generateRequestRef($checkRequest->labId);
+			$data['lastest_gen_request'] = $get_latest_gen_request;
+			$data['total'] = $checkRequest->total;
+			$data['customerId'] = $checkRequest->customerId;
+			$data['rstl_id'] = $checkRequest->rstl_id;
+		}	
+		
+		if (isset($_POST['Request'])) {
+			$newRequest = new Request;
+			// Create a new Request
+			$newRequest->paymentType=1;
+			$newRequest->attributes = $_POST['Request'];
+			$newRequest->customerName=customer::model()->findByPk($newRequest->customerId)->customerName;
+
+			if ($newRequest->save()) {
+				// get the samples..
+				$oldSamples = $checkRequest->samps;
+				
+				foreach ($oldSamples as $sample){
+					$sampleModel = new Sample;	
+					$sampleModel->rstl_id = Yii::app()->user->rstlId;
+					$sampleModel->sampleCode = $sample->sampleCode;
+					$sampleModel->sampleName = $sample->sampleName;
+					$sampleModel->description = $sample->description;
+					$sampleModel->remarks = $sample->remarks;
+					$sampleModel->requestId = $newRequest->requestRefNum;
+					$sampleModel->request_id = $newRequest->id;			
+					$sampleModel->sampleMonth = date('m', strtotime($newRequest->requestDate));	
+					$sampleModel->sampleYear = date('Y', strtotime($newRequest->requestDate));
+					$sampleModel->cancelled = 0;
+					$sampleModel->pstcsample_id = 0;
+					$sampleModel->sampleType_id = 0;
+					$sampleModel->samplingDate = $sample->samplingDate;
+					$sampleModel->jobType = $sample->jobType;
+					$sampleModel->serial_no = $sample->serial_no;
+					$sampleModel->brand = $sample->brand;
+					$sampleModel->capacity_range = $sample->capacity_range;
+					$sampleModel->resolution = $sample->resolution;
+					$sampleModel->model_no = $sample->model_no;
+					$sampleModel->save();
+
+					if ($sampleModel->save()) {
+						$labCode = Lab::model()->findByPk($newRequest->labId);
+						$year = date('Y', strtotime($newRequest->requestDate));
+						$code = new Samplecode;
+						$tsrNum = $newRequest->requestRefNum;
+						$sampleCode = $code->generateSampleCode2(
+							$labCode,
+							$year,
+							$tsrNum
+						);
+						$number = explode('-', $sampleCode);
+						$generated = $this->checkIfGeneratedSamples($newRequest);
+						if($generated == 0){
+							if ($sample->sampleCode == '') {
+								$this->appendSampleCode($newRequest, $number[1]);
+								Sample::model()->updateByPk($sample->id, array('sampleCode' => $sampleCode));
+							}
+						}
+					}
+					//get Analyses
+					$getAnalyses = $sample->analyses;
+					if ($getAnalyses && $sample->analysisCount > 0) {
+						foreach ($getAnalyses as $analysis) {
+							$newAnalysis = new Analysis;
+							$newAnalysis->rstl_id = Yii::app()->user->rstlId;
+							$newAnalysis->requestId = $newRequest->requestRefNum;;
+							$newAnalysis->sample_id = $sampleModel->id;
+							$newAnalysis->sampleCode = $analysis->sampleCode;
+							$newAnalysis->testName = Test::model()->findByPk($analysis->testId)->testName;
+							$newAnalysis->method = $analysis->method;
+							$newAnalysis->references = $analysis->references;
+							$newAnalysis->quantity = $analysis->quantity;
+							$newAnalysis->fee = $analysis->fee;
+							$newAnalysis->testId = $analysis->testId;
+							$newAnalysis->analysisMonth = date('m', strtotime($newRequest->requestDate));
+							$newAnalysis->analysisYear = date('Y', strtotime($newRequest->requestDate));
+							$newAnalysis->worksheet = $analysis->worksheet;
+							$newAnalysis->save();
+							if ($newAnalysis->save() === true) {
+								
+							}
+						}
+						
+					}
+				}
+				if (Yii::app()->request->isAjaxRequest){
+					echo CJSON::encode(array(
+                        'status' => 'success',
+						'div' => 'Successfuly Duplicate Service Request Going to the New Service Request',
+                        'id' => $newRequest->id,
+                    ));
+					exit;                                     
+                } else {
+                    echo CJSON::encode(array(
+                        'status' => 'error',
+                        'div' => "Could not Duplicate"
+                    ));
+                    $this->redirect(array('view','id'=>$newRequest->id));
+                }	
+			} 
+			else {
+				echo CJSON::encode(array(
+                    'status' => 'error',
+                    'div' => "Nothing to duplicate"
+                ));
+			}
+			
+		} else{
+			if (Yii::app()->request->isAjaxRequest){
+				$div = $this->renderPartial('formduplicate', array('model'=>$checkRequest, 'data'=>$data), true, true);
+				echo CJSON::encode(array(
+					'status'=>'failure',
+					'div'=>$div
+				));
+				exit;               
+			} else {
+				$this->render('createduplicate',array('model'=>$checkRequest,'data'=>$data));
+			}	
+		}
+    }
 
 	public function actionRemarks(){
 		$model = new Request;
@@ -1286,24 +1344,26 @@ class RequestController extends Controller
 	                    'status'=>'success', 
 	                    'div'=>"Remarks successfully added"
 	                    ));
-	                echo "save";
 	                exit;               
 	            }else{
 	            	echo CJSON::encode(array(
 	            		'status'=>'error',
-	            		'div'=>"Could not save"
+	            		'div'=>"Could not update remarks"
 	        		));
 	            	$this->redirect(array('view','id'=>$requestId));
 	            }	
 			}else{
 				echo CJSON::encode(array(
 	           		'status'=>'error',
-	           		'div'=>"Nothing to save"
+	           		'div'=>"Nothing to update remarks"
 	        	));
 			}
 		}
 		if (Yii::app()->request->isAjaxRequest){
-			$this->renderPartial('formremarks',array('model'=>$model, 'datas'=>$datas));
+			$div = $this->renderPartial('formremarks', array('model'=>$model, 'datas'=>$datas), true, true);
+			echo CJSON::encode(array(
+                'status'=>'failure',
+                'div'=>$div));
 	        exit;               
 	    }else{
 	        $this->renderPartial('formremarks',array('model'=>$model, 'datas'=>$datas));
@@ -1312,18 +1372,24 @@ class RequestController extends Controller
 
 	public function actionPrintLabelPdf($sample_id)
 	{
-		$sampleLabel = Sampletag::view($sample->id);
+		$sampleLabel = Sampletag::view($sample_id);
 
-		$pdf = Yii::createComponent('application.extensions.tcpdf.PrintLabelPdf', 
-		                            'P', 'cm', 'A4', true, 'UTF-8');
+		$pdf = Yii::createComponent(
+            'application.extensions.tcpdf.PrintLabelPdf',
+            'P',
+            'cm',
+            'A4',
+            true,
+            'UTF-8'
+        );
 
 		$pdf = new requestPdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         spl_autoload_register(array('YiiBase','autoload'));
- 
- 		$pdf->setSampleLabel($sampleLabel);
+
+        $pdf->setSampleLabel($sampleLabel);
         // set document information
         $pdf->SetCreator(PDF_CREATOR);  
- 
+
         $pdf->SetTitle($sampleLabel->sampleCode);               
         //$pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, "Selling Report -2013", "selling report for Jun- 2013");
         //$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
@@ -1335,12 +1401,12 @@ class RequestController extends Controller
         $pdf->SetAutoPageBreak(TRUE, 60);
         
         $pdf->AddPage();
- 
+
         $pdf->printRows();
         
         // reset pointer to the last page
         $pdf->lastPage();
- 
+
         //Close and output PDF document
         $pdf->Output($sampleLabel->sampleCode, 'I');
         //Yii::app()->end();
@@ -1364,8 +1430,9 @@ class RequestController extends Controller
 		// $pdf = Yii::createComponent('application.extensions.tcpdf.requestPdf', 
 		//                             'L', 'mm', array(66, 29), true, 'UTF-8');
 		// $pdf = new requestPdf('L', 'mm', array(66, 29), true, 'UTF-8', false);
-		$pdf = Yii::createComponent('application.extensions.tcpdf.requestPdf', 
-		                            'L', 'mm', array(56, 12), true, 'UTF-8');
+		$pdf = Yii::createComponent(
+            'application.extensions.tcpdf.requestPdf','L', 'mm', array(56, 12), true, 'UTF-8'
+        );
 		$pdf = new requestPdf('L', 'mm', array(56, 12), true, 'UTF-8', false);
 		$pdf->SetAutoPageBreak(TRUE, 0);
 		$pdf->SetPrintHeader(false);
@@ -1410,7 +1477,7 @@ class RequestController extends Controller
                   }
                  
                 </style>
-            ';
+        ';
        			$pdf->SetFont('helvetica', '', 10);
                 foreach($request->samps as $sample){
 				$pdf->AddPage();
@@ -1482,70 +1549,67 @@ class RequestController extends Controller
 			);
 
         $classRows = '
-                <style>
-                  table {
-                    font-style: arial;
-                    border-top: 0px solid #000;
-                    border-left: 0px solid #000;
-                    width: 50%;
-					table-layout:fixed;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					display:block;
-					overflow: hidden;
-					white-space: nowrap;
-					margin-left:0;
-					
-                  }
-                  td{
-                    border-right: 0px solid #000;
-                    border-bottom: 0px solid #000;
-					 margin: 0pt !important;
-        			padding: 0pt !important;
-					table-layout:fixed;
-					width:180px;
-					text-overflow: ellipsis;
-					display:block;
-					overflow: hidden;
-					white-space: nowrap;
-                  }
-                </style>
-            ';
+            <style>
+                table {
+                font-style: arial;
+                border-top: 0px solid #000;
+                border-left: 0px solid #000;
+                width: 50%;
+                table-layout:fixed;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display:block;
+                overflow: hidden;
+                white-space: nowrap;
+                margin-left:0;
+                
+                }
+                td{
+                border-right: 0px solid #000;
+                border-bottom: 0px solid #000;
+                    margin: 0pt !important;
+                padding: 0pt !important;
+                table-layout:fixed;
+                width:180px;
+                text-overflow: ellipsis;
+                display:block;
+                overflow: hidden;
+                white-space: nowrap;
+                }
+            </style>
+        ';
 
-				$pdf->SetFont('helvetica', '', 10);
-                foreach($request->samps as $sample){
-				$pdf->AddPage();
-						$year = substr($request->requestDate, 0,4);
-						$sampleBarcode = $sample->id . ' ' . $year. ' ' .$sample->sampleCode;
+        $pdf->SetFont('helvetica', '', 10);
+        foreach($request->samps as $sample){
+            $pdf->AddPage();
+            $year = substr($request->requestDate, 0,4);
+            $sampleBarcode = $sample->id . ' ' . $year. ' ' .$sample->sampleCode;
 
-						$limitname = substr($sample->sampleName, 0,22);
-						$pdf->write1DBarcode($sampleBarcode, 'C39', '1', '0', '', 5, 0.2, $style, 'N');
-						$title = '<b>'.$sampleBarcode.'</b> <font size="6">'.$limitname.'<br><b>Received:</b>&nbsp;'.$request->requestDate.'&nbsp;&nbsp;&nbsp;&nbsp;<b>Due:</b>&nbsp;'.$request->reportDue.'</font>';
-						
-						$pdf->writeHTMLCell(0,0,0,5, $title, 0, 9);
-						$style = array('width' => 0.2, 'cap' => 0, 'join' => 0, 'dash' => 0, 'color' =>'#000000');
-						$pdf->Line(1, 9, 65, 9, $style);
-					
-						$top = 12;
-						$topright = 12;
-						$i = 1;
-							foreach($sample->analyses as $analysis){
-										
-
-											if ($i++ >= 7)
-											 {
-											 	$rows = '<font size="7">'.$analysis->testName.'</font>';	
-												$pdf->writeHTMLCell(0,0,33,$top, $classRows.$rows, 0, 0);
-												$top = $top + 3; 
-											}else{
-													$rows = '<font size="7">'.$analysis->testName.'</font>';	
-													$pdf->writeHTMLCell(0,0,0,$topright, $classRows.$rows, 0, 0);
-													$topright = $topright + 3; 
-											}
-												
-									}  	
-						$pdf->writeHTMLCell(0,0,0,12, $parameters, 0, 9);	 
-						$pdf->lastPage();   		        
+            $limitname = substr($sample->sampleName, 0,22);
+            $pdf->write1DBarcode($sampleBarcode, 'C39', '1', '0', '', 5, 0.2, $style, 'N');
+            $title = '<b>'.$sampleBarcode.'</b> <font size="6">'.$limitname.'<br><b>Received:</b>&nbsp;'.$request->requestDate.'&nbsp;&nbsp;&nbsp;&nbsp;<b>Due:</b>&nbsp;'.$request->reportDue.'</font>';
+            
+            $pdf->writeHTMLCell(0,0,0,5, $title, 0, 9);
+            $style = array('width' => 0.2, 'cap' => 0, 'join' => 0, 'dash' => 0, 'color' =>'#000000');
+            $pdf->Line(1, 9, 65, 9, $style);
+        
+            $top = 12;
+            $topright = 12;
+            $i = 1;
+                foreach($sample->analyses as $analysis){
+                    if ($i++ >= 7){
+                        $rows = '<font size="7">'.$analysis->testName.'</font>';	
+                        $pdf->writeHTMLCell(0,0,33,$top, $classRows.$rows, 0, 0);
+                        $top = $top + 3; 
+                    }else{
+                        $rows = '<font size="7">'.$analysis->testName.'</font>';	
+                        $pdf->writeHTMLCell(0,0,0,$topright, $classRows.$rows, 0, 0);
+                        $topright = $topright + 3; 
+                    }
+                                    
+                }  	
+            $pdf->writeHTMLCell(0,0,0,12, $parameters, 0, 9);	 
+            $pdf->lastPage();   		        
         } 	
 		$pdf->IncludeJS("print();");
         $pdf->Output($request->requestRefNum.'.pdf', 'I');
@@ -1562,20 +1626,19 @@ class RequestController extends Controller
 		$analysis = Analysis::model()->findByPk($id);
 	
 		$tagging=new CActiveDataProvider('Tagging', 
-	 	array(
-			'criteria'=>array(
-		 	'condition'=>"analysisId=" .$id
-				 ),
-			 )
+            array(
+                'criteria'=>array(
+                    'condition'=>"analysisId=".$id
+                ),
+			)
 		);
-
 
 		echo CJSON::encode(array(
 			'div'=>$this->renderPartial('_analysisStatus', array('tagging' => $tagging, 'tag'=>$tag, 'analysis'=>$analysis),true,true)
 		));
 	}
     
-     public function actionStatusDetail()
+    public function actionStatusDetail()
 	{
 		if(isset($_POST['id']))
 		$id=$_POST['id'];

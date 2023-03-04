@@ -275,7 +275,7 @@ class Request extends CActiveRecord
 		parent::afterSave();
 		if($this->isNewRecord){
 			$requestCode = new Requestcode;
-			 
+
 			$requestCode->requestRefNum = $this->requestRefNum;
 			$requestCode->rstl_id = Yii::app()->getModule('user')->user()->profile->getAttribute('pstc');
 			$requestCode->labId = $this->labId;

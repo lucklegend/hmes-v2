@@ -8,10 +8,11 @@ $this->breadcrumbs=array(
 );
 
 $this->menu=array(
+	array('label'=>'List Request', 'url'=>array('index')),
 	array('label'=>'Manage Request', 'url'=>array('admin')),
 );
 ?>
 
-<h1>Create Request</h1>
+<h1>Add On-site Charge</h1>
 
-<?php $this->renderPartial('_form', array('model'=>$model)); ?>
+<?php $this->renderPartial('formadditional', array('model'=>$model, 'datas'=>$datas)); ?>

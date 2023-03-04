@@ -9,16 +9,7 @@ Yii::app()->clientScript->scriptMap['jquery.min.js'] = false;
 
 <div class="form">
 <?php
-	if (isset($modelSample->request_id)){ 
-		//$id=$modelSample->request_id;
-	}else{
-		$id=$sampleId;
-	}
-	$requestId = $_REQUEST['id']
-	
-?>
-<?php
-
+	$requestId = $_REQUEST['id'];
 
 	$form=$this->beginWidget('CActiveForm', array(
 	'id'=>'remarks-form',

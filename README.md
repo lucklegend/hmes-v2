@@ -122,3 +122,9 @@ From your existing hmes installation do the following:
         rename these tables as indicated above.
 
 more info soon...
+Find in protected/config/components.php
+change the directory of the codes to:
+'jquery-ui.css' => '/<nameOfFolder>/css/jqueryui/cupertino/jquery-ui.css',
+
+Find in protected/config/db.php
+Update the necessary db names.

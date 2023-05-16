@@ -513,14 +513,10 @@ class AnalysisController extends Controller
 		$analysis = Analysis::model()->findByPk($id);
 		$sample = Sample::model()->findByPk($analysis->sample_id);
 		$request = Request::model()->findByPk($sample->request_id);
-
 		$codes = explode('-', $sample->sampleCode);
 		$sampleCode = $sample->requestId . '-' . substr($codes[1], 1);
-
-		
 		$analysisWorksheet = $analysis->worksheet;
 		
-
 		if ($analysisWorksheet == '') {
 			return $this->redirect(array('request/view', 'id' => $sample->request_id));
 		} 
@@ -597,47 +593,28 @@ class AnalysisController extends Controller
 
 		//Close and output PDF document
 		$pdf->Output($sampleCode . '.pdf', 'I');
-		//Yii::app()->end();
+		Yii::app()->end();
 
 	}
 
 	public function actionPrintworksheetWord($id)
 	{
-		$sample = Sample::model()->findByPk($id);
+		$analysis = Analysis::model()->findByPk($id);
+		$sample = Sample::model()->findByPk($analysis->sample_id);
 		$request = Request::model()->findByPk($sample->request_id);
-
 		$codes = explode('-', $sample->sampleCode);
 		$sampleCode = $sample->requestId . '-' . substr($codes[1], 1);
-
-		foreach ($sample->analyses as $analysis) {
-			$analysisWorksheet = $analysis->worksheet;
-		}
-
-		if ($analysisWorksheet == '') {
-			return $this->redirect(array('request/view', 'id' => $sample->request_id));
-		}
-
-		$div = $this->renderPartial(
-			'worksheet/'.$analysisWorksheet, 
-			array(
-				'sample' => $sample, 
-				'request' => $request
-			),
-			true
-		);
-
-		header("Pragma: no-cache"); // required
-		header("Expires: 0");
-		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-		header("Cache-Control: private", false); // required for certain browsers
-		header("Content-type: application/vnd.ms-word");
-		header("Content-Disposition: attachment; filename=\" ".$analysisWorksheet."_".$sampleCode.".doc");
-		header("Content-Transfer-Encoding: binary");
-		ob_clean();
-		flush();
-
-		echo $div;
+		$analysisWorksheet = $analysis->worksheet;
 		
 
+		$phpWord = Yii::app()->phpWord->createDocument();
+		
+		// download the file.
+		$filePath = '';
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Length: ' . filesize($filePath));
+		readfile($filePath);
 	}
 }

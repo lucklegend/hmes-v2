@@ -1,6 +1,4 @@
 <?php
-
-use PhpOffice\PhpWord\PhpWord;
 class AnalysisController extends Controller
 {
 	/**
@@ -584,7 +582,10 @@ class AnalysisController extends Controller
 
 	public function actionPrintworksheetWord($id)
 	{
+		Yii::import('application.extensions.phpword.PhpWord');
+		Yii::import('application.extensions.phpword.IOFactory');
 		$phpWord = new PhpWord();
+
 		$analysis = Analysis::model()->findByPk($id);
 		$sample = Sample::model()->findByPk($analysis->sample_id);
 		$request = Request::model()->findByPk($sample->request_id);
@@ -595,6 +596,14 @@ class AnalysisController extends Controller
 
 		$phpWord = Yii::app()->phpword->createDocument();
 		
+		// pathway for templates
+		$templatePath = Yii::getPathOfAlias('application.extensions.phpword.templates');
+		
+
+		if(!file_exists($templatePath)) {
+			throw new CHttpException(404, 'The requested filepath does not exist.');
+		}
+
 		$section = $phpWord->addSection();
 		$section->addText(
 			'Lets Get It On'.$sampleCode.$analysisWorksheet.$request->id
@@ -612,11 +621,7 @@ class AnalysisController extends Controller
 		$properties->setTitle('My title');
 		$properties->setDescription('My description');
 		
-		// download the file.
-		$filePath = '';
-		if (!file_exists($filePath)) {
-			throw new CHttpException(404, 'The requested file does not exist.');
-		}
+		
 		header('Content-Type: application/octet-stream');
 		header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
 		header('Content-Transfer-Encoding: binary');

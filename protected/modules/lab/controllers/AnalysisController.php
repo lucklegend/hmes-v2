@@ -386,17 +386,14 @@ class AnalysisController extends Controller
 	}
 	
 	function actionGetCategorytype(){
-		$data = Testcategory::model()->findAll('labId=:labId', 
-					  array(':labId'=>3));
-					  
+		$data = Testcategory::model()->findAll('labId=:labId', array(':labId'=>3));
+
 		$data = CHtml::listData($data,'id','categoryName');
 		//append blank
-		echo CHtml::tag('option', array('value'=>''),CHtml::encode($name),true);
+		echo CHtml::tag('option', array('value'=>''), CHtml::encode($name),true);
 		
-		foreach($data as $value=>$name)
-		{
-			echo CHtml::tag('option',
-					   array('value'=>$value),CHtml::encode($name),true);
+		foreach($data as $value=>$name){
+			echo CHtml::tag('option', array('value'=>$value), CHtml::encode($name),true);
 		}			  
 	}
 	
@@ -416,8 +413,7 @@ class AnalysisController extends Controller
 		
 		foreach($data as $value=>$name)
 		{
-			echo CHtml::tag('option',
-					   array('value'=>$value),CHtml::encode($name),true);
+			echo CHtml::tag('option', array('value'=>$value),CHtml::encode($name),true);
 		}
 		Yii::app()->session['sampleType'] = $data;	
 	}
@@ -511,4 +507,114 @@ class AnalysisController extends Controller
 		echo CJSON::encode($data); 
 		exit;
 	}	
+
+	public function actionPrintworksheetPDF($id)
+	{
+		$analysis = Analysis::model()->findByPk($id);
+		$sample = Sample::model()->findByPk($analysis->sample_id);
+		$request = Request::model()->findByPk($sample->request_id);
+		$codes = explode('-', $sample->sampleCode);
+		$sampleCode = $sample->requestId . '-' . substr($codes[1], 1);
+		$analysisWorksheet = $analysis->worksheet;
+		
+		if ($analysisWorksheet == '') {
+			return $this->redirect(array('request/view', 'id' => $sample->request_id));
+		} 
+		switch($analysisWorksheet){
+			case 'balanceworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.balanceworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new balanceworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'hydrostaticworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.hydrostaticworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new hydrostaticworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'pressureworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.pressureworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new pressureworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'reliefvalveworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.reliefvalveworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new reliefvalveworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'loadworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.loadworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new loadworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'pneumaticworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.pneumaticworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new pneumaticworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'stopwatchworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.stopwatchworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new stopwatchworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'textiletapeworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.textiletapeworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new textiletapeworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'steeltapeworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steeltapeworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new steeltapeworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'steeltapeworksheet50':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steeltapeworksheetfifty', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new SteelTapeWorksheetFifty(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'steelruleworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steelruleworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new steelruleworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'tempcontrollerworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.tempcontrollerworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new tempcontrollerworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'storagetankworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.storagetankworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new storagetankworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				$pdf->setFooterMargin(20);
+				$pdf->SetAutoPageBreak(TRUE, 27);	
+				break;
+		}
+
+		spl_autoload_register(array('YiiBase', 'autoload'));
+
+		$pdf->setRequest($request);
+		$pdf->setSample($sample);
+		$pdf->SetCreator(PDF_CREATOR);
+		$pdf->SetTitle($sampleCode);
+		$pdf->SetMargins(0, 28.15, 0);
+		$pdf->SetAutoPageBreak(TRUE, 10);
+		$pdf->AddPage();
+		$pdf->printRows();
+
+		// reset pointer to the last page
+		$pdf->lastPage();
+
+		//Close and output PDF document
+		$pdf->Output($sampleCode . '.pdf', 'I');
+		Yii::app()->end();
+
+	}
+
+	public function actionPrintworksheetWord($id)
+	{
+		$analysis = Analysis::model()->findByPk($id);
+		$sample = Sample::model()->findByPk($analysis->sample_id);
+		$request = Request::model()->findByPk($sample->request_id);
+		$codes = explode('-', $sample->sampleCode);
+		$sampleCode = $sample->requestId . '-' . substr($codes[1], 1);
+		$analysisWorksheet = $analysis->worksheet;
+		
+
+		$phpWord = Yii::app()->phpWord->createDocument();
+		
+		// download the file.
+		$filePath = '';
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Length: ' . filesize($filePath));
+		readfile($filePath);
+	}
 }

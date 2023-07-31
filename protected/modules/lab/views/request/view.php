@@ -235,18 +235,11 @@
                 'header' => 'Actions',
                 'class' => 'bootstrap.widgets.TbButtonColumn',
                 'deleteConfirmation' => "js:'Do you really want to delete sample: '+$.trim($(this).parent().parent().children(':nth-child(2)').text())+'?'",
-                'template' => ($generated >= 1) ? '{delete} {worksheet}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete} {worksheet}' : (Yii::app()->getModule('lab')->isLabAdmin() == 'Lab - System Manager' ? ' {worksheet}' : '{cancel}')),
+                'template' => ($generated >= 1) ? '{delete}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete}' : (Yii::app()->getModule('lab')->isLabAdmin() == 'Lab - System Manager' ? '' : '{cancel}')),
                 'buttons' => array(
                     'delete' => array(
                         'label' => 'Delete Sample',
                         'url' => 'Yii::app()->createUrl("lab/sample/delete/id/$data->id")',
-                    ),
-                    'worksheet' => array(
-                        'label' => 'Print Worksheet',
-                        'icon' => 'print',
-                        'url' => 'Yii::app()->createUrl("lab/sample/printworksheet/id/$data->id")',
-                        'options' => array('target' => '_blank'),
-                        'onClick' => 'js:preventDefault()',
                     ),
                     'cancel' => array(
                         'label' => 'Cancel',
@@ -443,7 +436,7 @@
                 'header' => 'Actions',
                 'class' => 'bootstrap.widgets.TbButtonColumn',
                 'deleteConfirmation' => "js:'Do you really want to delete analysis: '+$.trim($(this).parent().parent().children(':nth-child(3)').text())+'?'",
-                'template' => ($generated >= 1) ? '{delete}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete}' : ''),
+                'template' => ($generated >= 1) ? '{delete} {worksheet}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete} {worksheet}' : ''),
                 'buttons' => array(
                     'delete' => array(
                         'label' => 'Delete Sample',
@@ -457,6 +450,13 @@
                         'imageUrl' => '',
                         'imageUrl' => Yii::app()->request->baseUrl . '/images/customer_add.png',
                         'visible' => '$data->package == 1'
+                    ),
+                    'worksheet' => array(
+                        'label' => 'Print Worksheet',
+                        'icon' => 'print',
+                        'url' => 'Yii::app()->createUrl("lab/analysis/printworksheetpdf/id/$data->id")',
+                        'options' => array('target' => '_blank'),
+                        'onClick' => 'js:preventDefault()',
                     ),
                     'cancel' => array(
                         'label' => 'Cancel',

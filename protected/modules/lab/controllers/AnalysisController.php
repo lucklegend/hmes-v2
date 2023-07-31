@@ -1,5 +1,6 @@
 <?php
 
+use PhpOffice\PhpWord\PhpWord;
 class AnalysisController extends Controller
 {
 	/**
@@ -74,8 +75,7 @@ class AnalysisController extends Controller
 			$request = Request::model()->findByPk($requestId); 
 		}
 		
-		if(isset($_POST['Analysis']))
-		{
+		if(isset($_POST['Analysis'])) {
 			$totalSamples = count($_POST['Analysis']['sample_id']);
 			$count = 0;
 			$done = false;
@@ -105,24 +105,22 @@ class AnalysisController extends Controller
 				else 
 					$done = false;
 			}	
-				if($done){
-					//$this->redirect(array('view','id'=>$model->id));
-					if (Yii::app()->request->isAjaxRequest)
-	                {
-	                    echo CJSON::encode(array(
-	                        'status'=>'success', 
-	                        'div'=>"Analysis successfully added"
-	                        ));
-	                    exit;               
-	                }
-	                else
-	                    $this->redirect(array('view','id'=>$model->id));
+			if ($done) {
+				//$this->redirect(array('view','id'=>$model->id));
+				if (Yii::app()->request->isAjaxRequest) {
+					echo CJSON::encode(array(
+						'status'=>'success', 
+						'div'=>"Analysis successfully added"
+						));
+					exit;               
 				}
+				else
+					$this->redirect(array('view','id'=>$model->id));
+			}
 			
 		}
 		
-		if (Yii::app()->request->isAjaxRequest)
-        {
+		if (Yii::app()->request->isAjaxRequest) {
 			if($request->sampleCount){
 				$status='failure';
 				$div=$this->renderPartial('_form', array('model'=>$model,'requestId'=>$requestId, 'request'=>$request) ,true , true);
@@ -131,13 +129,15 @@ class AnalysisController extends Controller
 				$div='<div style="text-align:center;" class="alert alert-error"><i class="icon icon-warning-sign"></i><font style="font-size:14px;"> System Warning. </font><br \><br \><div>Please add at least one(1) sample for analysis.</div></div>';
 			}
 				echo CJSON::encode(array(
-					'status'=>$status,'div'=>$div));
+					'status'=>$status,
+					'div'=>$div)
+				);
 					
             exit;               
-        }else{
+        }
+		else {
             $this->render('create',array('model'=>$model,));
         }
-		//$this->render('create',array('model'=>$model,));
 	}
 
 	public function actionPackage()
@@ -170,24 +170,6 @@ class AnalysisController extends Controller
 			}*/
 			
 			foreach($_POST['Analysis']['sample_id'] as $sample_id){
-						
-				//$countTests = count($testArray);
-				
-				// $model = New Analysis;
-				// $model->requestId = $_POST['Analysis']['requestId'];
-				// $model->sample_id = $sample_id;
-				// $model->testName = $package->name;
-				// //$model->method = 'hahaha';
-				// //$model->references = 'hahaha';
-				// $model->quantity = 1;
-				// // $model->fee = $package->rate;
-				// $model->fee = 0;
-				// $model->testId = 0;
-				// $model->analysisMonth = $_POST['Analysis']['analysisMonth'];
-				// $model->analysisYear = $_POST['Analysis']['analysisYear'];
-				// $model->package = $_POST['Analysis']['package'];
-				// $model->rstl_id = Yii::app()->user->rstlId;
-				// $model->save();
 				
 				for($i=0; $i<$countTests; $i++){
 					$test = Test::model()->findByPk($testArray[$i]);
@@ -214,32 +196,33 @@ class AnalysisController extends Controller
 				else 
 					$done = false;
 			}	
-				if($done){
-					//$this->redirect(array('view','id'=>$model->id));
-					if (Yii::app()->request->isAjaxRequest)
-	                {
-	                    echo CJSON::encode(array(
-	                        'status'=>'success', 
-	                        'div'=>"Package successfully added"
-	                        ));
-	                    exit;               
-	                }
-	                else
-	                    $this->redirect(array('view','id'=>$model->id));
+			if($done){
+				if (Yii::app()->request->isAjaxRequest) {
+					echo CJSON::encode(array(
+						'status'=>'success', 
+						'div'=>"Package successfully added"
+						)
+					);
+					exit;               
 				}
+				else
+					$this->redirect(array('view','id'=>$model->id));
+			}
 			
 		}
 		
 		if (Yii::app()->request->isAjaxRequest){
 			
-			if($request->sampleCount){
+			if ($request->sampleCount) {
 				$div=$this->renderPartial('_formpackage', array('model'=>$model,'requestId'=>$requestId, 'request'=>$request) ,true , true);
-			}else{
+			}
+			else{
 				$div='<div style="text-align:center;" class="alert alert-error"><i class="icon icon-warning-sign"></i><font style="font-size:14px;"> System Warning. </font><br \><br \><div>Please add at least one(1) sample for analysis.</div></div>';
 			}
             echo CJSON::encode(array(
                 'status'=>'failure',
-                'div'=>$div));
+                'div'=>$div
+			));
             exit;               
         }else{
             $this->render('package',array('model'=>$model,));
@@ -293,8 +276,8 @@ class AnalysisController extends Controller
                 'div'=>$this->renderPartial('_form', array('model'=>$model,'sampleId'=>$sampleId,
 				), true, true)));
             exit;               
-        }else{
-        		
+        }
+		else {
 			$this->render('update',array('model'=>$model,'sampleId'=>$sampleId));
         }
 	}
@@ -324,8 +307,8 @@ class AnalysisController extends Controller
 	{
 		Analysis::model()->updateByPk($id, 
 			array('cancelled'=>1,
-				  'deleted'=>1,
-				  'fee'=>0,
+				'deleted'=>1,
+				'fee'=>0,
 			));
 		$request_id = Analysis::model()->findByPk($id)->sample->request->id;	
 		Request::updateRequestTotal($request_id);
@@ -405,7 +388,8 @@ class AnalysisController extends Controller
 			$category = $_POST['testCategoryUpdate'];
 			
 		$data = Sampletype::model()->findAll('testCategoryId=:testCategoryId ORDER BY sampleType', 
-					  array(':testCategoryId'=>$category));
+			array(':testCategoryId'=>$category)
+		);
 	 
 		$data = CHtml::listData($data,'id','sampleType');
 		//append blank
@@ -422,42 +406,43 @@ class AnalysisController extends Controller
 	//please enter current controller name because yii send multi dim array
 		if(isset($_POST['testCategory']))
 			$sampleType = $_POST['sampleType'];
+
 		if(isset($_POST['testCategoryUpdate']))
 			$sampleType = $_POST['sampleTypeUpdate'];
-			 
+
 		$data=Test::model()->findAll('sampleType=:sampleType ORDER BY testName', 
-					  array(':sampleType'=>$sampleType));
-	 
+			array(':sampleType'=>$sampleType)
+		);
+
 		$data=CHtml::listData($data,'id','testName');
 		//append blank
 		echo CHtml::tag('option', array('value'=>''),CHtml::encode($name),true);
 		
-		foreach($data as $value=>$name)
-		{
-			echo CHtml::tag('option',
-					   array('value'=>$value),CHtml::encode($name),true);
+		foreach($data as $value=>$name) {
+			echo CHtml::tag(
+				'option',
+				array('value'=>$value),
+				CHtml::encode($name),
+				true
+			);
 		}
 		Yii::app()->session['analysis'] = $data;	
 	}
 
 	function actionGetPackages(){
-	//please enter current controller name because yii send multi dim array
-		///if(isset($_POST['sampleType']))
-			//$sampleType = $_POST['sampleType'];
-			 
+		//please enter current controller name because yii send multi dim array
+
 		$data=Package::model()->findAll('sampletype_id = :sampletype_id', 
-					  array(':sampletype_id'=>$_POST['sampleType']));
-	 
+			array(':sampletype_id'=>$_POST['sampleType']));
+
 		$data=CHtml::listData($data,'id','name');
 		//append blank
 		echo CHtml::tag('option', array('value'=>''),CHtml::encode($name),true);
 		
-		foreach($data as $value=>$name)
-		{
+		foreach($data as $value=>$name) {
 			echo CHtml::tag('option',
-					   array('value'=>$value),CHtml::encode($name),true);
+				array('value'=>$value),CHtml::encode($name),true);
 		}
-		//Yii::app()->session['analysis'] = $data;	
 	}	
 	
 	function actionGetAnalysisdetails(){
@@ -599,6 +584,7 @@ class AnalysisController extends Controller
 
 	public function actionPrintworksheetWord($id)
 	{
+		$phpWord = new PhpWord();
 		$analysis = Analysis::model()->findByPk($id);
 		$sample = Sample::model()->findByPk($analysis->sample_id);
 		$request = Request::model()->findByPk($sample->request_id);
@@ -607,10 +593,30 @@ class AnalysisController extends Controller
 		$analysisWorksheet = $analysis->worksheet;
 		
 
-		$phpWord = Yii::app()->phpWord->createDocument();
+		$phpWord = Yii::app()->phpword->createDocument();
+		
+		$section = $phpWord->addSection();
+		$section->addText(
+			'Lets Get It On'.$sampleCode.$analysisWorksheet.$request->id
+		);
+		$phpWord->setDefaultFontSize(12);
+		$section->addText(
+			'"Great achievement is usually born of great sacrifice, '
+				. 'and is never the result of selfishness." '
+				. '(Napoleon Hill)',
+			array('name' => 'Tahoma', 'size' => 10)
+		);
+		$properties = $phpWord->getDocInfo();
+		$properties->setCreator('My name');
+		$properties->setCompany('My factory');
+		$properties->setTitle('My title');
+		$properties->setDescription('My description');
 		
 		// download the file.
 		$filePath = '';
+		if (!file_exists($filePath)) {
+			throw new CHttpException(404, 'The requested file does not exist.');
+		}
 		header('Content-Type: application/octet-stream');
 		header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
 		header('Content-Transfer-Encoding: binary');

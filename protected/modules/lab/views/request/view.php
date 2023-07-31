@@ -436,7 +436,7 @@
                 'header' => 'Actions',
                 'class' => 'bootstrap.widgets.TbButtonColumn',
                 'deleteConfirmation' => "js:'Do you really want to delete analysis: '+$.trim($(this).parent().parent().children(':nth-child(3)').text())+'?'",
-                'template' => ($generated >= 1) ? '{delete} {worksheet}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete} {worksheet}' : ''),
+                'template' => ($generated >= 1) ? '{delete} {worksheet} {word}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete} {worksheet} {word}' : ''),
                 'buttons' => array(
                     'delete' => array(
                         'label' => 'Delete Sample',
@@ -455,6 +455,13 @@
                         'label' => 'Print Worksheet',
                         'icon' => 'print',
                         'url' => 'Yii::app()->createUrl("lab/analysis/printworksheetpdf/id/$data->id")',
+                        'options' => array('target' => '_blank'),
+                        'onClick' => 'js:preventDefault()',
+                    ),
+                    'word' => array(
+                        'label' => 'Print Worksheet Word Format',
+                        'icon' => 'file',
+                        'url' => 'Yii::app()->createUrl("lab/analysis/printworksheetword/id/$data->id")',
                         'options' => array('target' => '_blank'),
                         'onClick' => 'js:preventDefault()',
                     ),

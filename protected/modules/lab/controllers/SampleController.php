@@ -441,6 +441,7 @@ class SampleController extends Controller
 			exit;
 		}
 	}
+
 	public function actionPrintworksheet($id)
 	{
 		$sample = Sample::model()->findByPk($id);
@@ -455,55 +456,63 @@ class SampleController extends Controller
 
 		if ($sampleWorksheet == '') {
 			return $this->redirect(array('request/view', 'id' => $sample->request_id));
+		} 
+		switch($sampleWorksheet){
+			case 'balanceworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.balanceworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new balanceworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'hydrostaticworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.hydrostaticworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new hydrostaticworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'pressureworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.pressureworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new pressureworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'reliefvalveworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.reliefvalveworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new reliefvalveworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'loadworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.loadworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new loadworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'pneumaticworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.pneumaticworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new pneumaticworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'stopwatchworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.stopwatchworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new stopwatchworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'textiletapeworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.textiletapeworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new textiletapeworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'steeltapeworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steeltapeworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new steeltapeworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'steeltapeworksheet50':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steeltapeworksheetfifty', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new SteelTapeWorksheetFifty(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'steelruleworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steelruleworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new steelruleworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'tempcontrollerworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.tempcontrollerworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new tempcontrollerworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				break;
+			case 'storagetankworksheet':
+				$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.storagetankworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
+				$pdf = new storagetankworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+				$pdf->setFooterMargin(20);
+				$pdf->SetAutoPageBreak(TRUE, 27);	
+				break;
 		}
-
-		if ($sampleWorksheet == 'balanceworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.balanceworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new balanceworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'hydrostaticworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.hydrostaticworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new hydrostaticworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'pressureworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.pressureworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new pressureworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'reliefvalveworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.reliefvalveworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new reliefvalveworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'loadworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.loadworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new loadworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'pneumaticworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.pneumaticworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new pneumaticworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'stopwatchworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.stopwatchworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new stopwatchworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'textiletapeworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.textiletapeworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new textiletapeworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'steeltapeworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steeltapeworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new steeltapeworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'steeltapeworksheet50') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steeltapeworksheetfifty', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new SteelTapeWorksheetFifty(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'steelruleworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.steelruleworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new steelruleworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'tempcontrollerworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.tempcontrollerworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new tempcontrollerworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		} elseif ($sampleWorksheet == 'storagetankworksheet') {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.storagetankworksheet', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new storagetankworksheet(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-			$pdf->setFooterMargin(20);
-		} else {
-			$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.requestPdf', 'P', 'cm', 'A4', true, 'UTF-8');
-			$pdf = new requestPdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		}
-		//$pdf = Yii::createComponent('application.extensions.tcpdf.worksheet.requestPdf', 'P', 'cm', 'A4', true, 'UTF-8');
-		//$pdf = new requestPdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
 
 		spl_autoload_register(array('YiiBase', 'autoload'));
 
@@ -512,15 +521,8 @@ class SampleController extends Controller
 		$pdf->SetCreator(PDF_CREATOR);
 		$pdf->SetTitle($sampleCode);
 		$pdf->SetMargins(0, 28.15, 0);
-		
-		if($sampleWorksheet == 'storagetankworksheet'){
-			$pdf->SetAutoPageBreak(TRUE, 27);	
-		}else{
-			$pdf->SetAutoPageBreak(TRUE, 10);
-		}
-
+		$pdf->SetAutoPageBreak(TRUE, 10);
 		$pdf->AddPage();
-
 		$pdf->printRows();
 
 		// reset pointer to the last page
@@ -531,6 +533,7 @@ class SampleController extends Controller
 		//Yii::app()->end();
 
 	}
+
 	public function actionGenerateSampleCodeReferral()
 	{
 		$html = "<pre>";

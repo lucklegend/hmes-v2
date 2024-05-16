@@ -4,7 +4,7 @@ require_once(dirname(__FILE__).'/../tcpdf.php');
 class steeltapeworksheet extends TCPDF {
  
     var $request;
-    var $customerId;
+    var $customer;
     var $sample;
 
     public function setRequest($request) {
@@ -41,7 +41,8 @@ class steeltapeworksheet extends TCPDF {
     public function printRows() {
         $request = $this->request;
         $id = $_GET['id'];
-        $sample = Sample::model()->findByPk($id);
+        $analysis = Analysis::model()->findByPk($id);
+        $sample = Sample::model()->findByPk($analysis->sample->id);
         $codes = explode('-', $sample->sampleCode);
 
         $sampleCode = $sample->requestId.'-'.substr($codes[1], 1);

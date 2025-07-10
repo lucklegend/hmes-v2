@@ -15,18 +15,31 @@ class requestWord {
     private $request;
     private $phpWord;
 
+    /**
+     * Initializes the requestWord instance with the provided request data and sets up the PHPWord document with default styles.
+     *
+     * @param object $request The request data object containing all necessary information for document generation.
+     */
     public function __construct($request) {
         $this->request = $request;
         $this->phpWord = new PhpWord();
         $this->setDefaultStyles();
     }
 
+    /**
+     * Sets the default font name and size for the Word document.
+     */
     private function setDefaultStyles() {
         // Set default font and size (optional, but good practice)
         $this->phpWord->setDefaultFontName('Helvetica');
         $this->phpWord->setDefaultFontSize(9);
     }
 
+    /**
+     * Generates and outputs a Word document representing the request form.
+     *
+     * Assembles all sections of the request form, including header, request and customer details, service and sample tables, financial totals, remarks, and footer. Outputs the document directly to the browser as a downloadable .docx file and terminates the application.
+     */
     public function generateDocument() {
         $this->addHeaderContent();
         $this->addRequestDetailsTable();
@@ -49,6 +62,9 @@ class requestWord {
         Yii::app()->end();
     }
 
+    /**
+     * Adds the document header section with agency information and form title, centered at the top of the Word document.
+     */
     private function addHeaderContent() {
         $section = $this->phpWord->addSection();
 
@@ -64,6 +80,11 @@ class requestWord {
         $section->addTextBreak(1);
     }
 
+    /**
+     * Adds a table to the document displaying the request reference number, date, and time.
+     *
+     * The table is styled with borders and set to 46% width, and is followed by a line break.
+     */
     private function addRequestDetailsTable() {
         $section = $this->phpWord->getLastSection();
 
@@ -93,6 +114,9 @@ class requestWord {
         $section->addTextBreak(1);
     }
 
+    /**
+     * Adds a table to the document section displaying customer details such as name, telephone, address, and fax number.
+     */
     private function addCustomerDetails() {
         $section = $this->phpWord->getLastSection();
 
@@ -123,6 +147,11 @@ class requestWord {
         $section->addTextBreak(1);
     }
 
+    /**
+     * Adds the "Testing or Calibration Service" section header and table to the document.
+     *
+     * This section includes a bold heading and a table with column headers for sample details, requested tests, methods, quantities, unit costs, and totals.
+     */
     private function addTestingOrCalibrationServiceSection() {
         $section = $this->phpWord->getLastSection();
         $section->addText('1. TESTING OR CALIBRATION SERVICE', ['bold' => true, 'size' => 9]);
@@ -148,6 +177,9 @@ class requestWord {
         $table->addCell(1040, $headerCellStyle)->addText('TOTAL', $headerFontStyle, $centeredParagraphStyle);
     }
 
+    /**
+     * Adds rows to the document table for each sample and its analyses, displaying sample details, analysis information, and fees, while calculating and storing the subtotal of all analysis fees.
+     */
     private function addSampleAndAnalysisRows() {
         $section = $this->phpWord->getLastSection();
 
@@ -189,6 +221,11 @@ class requestWord {
         $this->subTotal = $subTotal; // Store for later use in totals
     }
 
+    /**
+     * Adds a totals table to the document, displaying the subtotal, discount, in-plant charge, additional charges, and the final total amount.
+     *
+     * The table summarizes all financial calculations for the request, using values from the request object and previously computed subtotal.
+     */
     private function addTotals() {
         $section = $this->phpWord->getLastSection();
 
@@ -246,6 +283,11 @@ class requestWord {
         $section->addTextBreak(1);
     }
 
+    /**
+     * Adds a section to the document listing brief descriptions and remarks for each sample.
+     *
+     * Each sample's code and description are displayed in a bordered table under the "2. BRIEF DESCRIPTION OF SAMPLE/REMARKS" heading.
+     */
     private function addBriefDescriptionSection() {
         $section = $this->phpWord->getLastSection();
         $section->addText('2. BRIEF DESCRIPTION OF SAMPLE/REMARKS', ['bold' => true, 'size' => 9]);
@@ -268,6 +310,11 @@ class requestWord {
         $section->addTextBreak(1);
     }
 
+    /**
+     * Adds the "Other Service" section to the Word document as a placeholder.
+     *
+     * This section includes a heading and an empty table with rows corresponding to the number of samples in the request, matching the original PDF's minimal content for this section.
+     */
     private function addOtherServiceSection() {
         $section = $this->phpWord->getLastSection();
         $section->addText('3. OTHER SERVICE', ['bold' => true, 'size' => 9]);
@@ -287,6 +334,11 @@ class requestWord {
         $section->addTextBreak(1);
     }
 
+    /**
+     * Adds the footer section to the Word document, including tables for official receipt details, report due date, and signatories.
+     *
+     * The footer contains placeholders for OR number, amount received, date, unpaid balance, and report due date. It also includes a signatories table with customer, receiver, and laboratory manager names, as well as form metadata such as form number and revision information.
+     */
     private function addFooterContent() {
         // Footer content is complex and involves precise positioning.
         // This will be a simplified version. For precise layout,

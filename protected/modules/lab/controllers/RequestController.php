@@ -1068,6 +1068,54 @@ class RequestController extends Controller
         $pdf->Output($request->requestRefNum.'.pdf', 'I');
         //Yii::app()->end();
 	}
+
+	public function actionPrintWord($id)
+	{
+		$request = Request::model()->findByPk($id);
+
+		// Similar calculations as in actionPrintPDF, or ensure requestWord handles them.
+		// For now, assume requestWord will handle necessary data hydration.
+		// It's good practice to ensure totals are updated before any print action.
+		$subTotal =0;
+		foreach($request->samps as $sample){
+			foreach($sample->analyses as $analysis){
+				$subTotal = $subTotal + $analysis->fee;
+			}
+		}
+		if($request->discount == 8){ // Assuming 8 is a special discount ID
+			$discounted = $request->discounted; // Pre-calculated discount
+		} else {
+			// Ensure disc relationship and rate property exist and are valid
+			$discountRate = (isset($request->disc) && isset($request->disc->rate)) ? $request->disc->rate : 0;
+			$discounted = $subTotal * ($discountRate / 100);
+		}
+
+        $inplantcharge = $request->inplant_charge;
+        $additional = $request->additional;
+        $totalFees = $inplantcharge + $additional + $subTotal - $discounted;
+
+        if($request->vat == 1){
+		$vat = $totalFees * 0.12;
+        }else{
+		$vat = 0;
+        }
+        $grandTotal = $totalFees + $vat;
+
+        // Update the request total. This is also done in actionPrintPDF.
+        // Consider refactoring this to a common method if it's always needed before printing.
+        Request::model()->updateByPk($id, array('total'=>$grandTotal) );
+        $request = Request::model()->findByPk($id); // Re-load to get updated total
+
+		// Yii::import('application.extensions.phpword.requestWord');
+		// The above Yii::import might not be strictly necessary if Yii's autoloader
+		// is configured to find classes in protected/extensions (which is common).
+		// However, PHPWord itself needs its bootstrap.php to be included once.
+		// This is handled in requestWord.php for now.
+
+		$wordDoc = new requestWord($request);
+        $wordDoc->generateDocument();
+        Yii::app()->end(); // Ensure no further output interferes with the file download
+	}
 	
 	function actionPrint($id)
 	{
@@ -1090,6 +1138,9 @@ class RequestController extends Controller
 				break;
 			case 2:
 				$this->redirect(array('genRequestExcel','id'=>$id));
+				break;
+			case 3: // Assuming 3 will be for Word
+				$this->redirect(array('printWord','id'=>$id));
 				break;
 			default:
 				$this->redirect(array('printPDF','id'=>$id));

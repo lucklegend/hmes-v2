@@ -502,12 +502,24 @@
                     'type' => 'success', // '', 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'
                     'buttons' => array(
                         array(
-                            'label' => 'Print Request',
+                            'label' => 'Print Request (PDF)',
                             'url' => $this->createUrl('request/printPDF/', array('id' => $model->id)),
                             'htmlOptions' => array('target' => '_blank'),
                         ),
                     ),
                 ));
+                echo '&nbsp;'; // Add some spacing
+                $this->widget('bootstrap.widgets.TbButtonGroup', array(
+                    'type' => 'primary', // Different color for Word button
+                    'buttons' => array(
+                        array(
+                            'label' => 'Print Request (Word)',
+                            'url' => $this->createUrl('request/printWord/', array('id' => $model->id)),
+                            'htmlOptions' => array('target' => '_blank'), // Should download directly
+                        ),
+                    ),
+                ));
+                echo '&nbsp;';
                 $this->widget('bootstrap.widgets.TbButtonGroup', array(
                     'type' => 'success', // '', 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'
                     'buttons' => array(
@@ -526,8 +538,9 @@
                     'buttons' => array(
                         array('label' => 'Print Request', 'url' => $this->createUrl('request/print', array('id' => $model->id)), 'htmlOptions' => array('target' => (Yii::app()->params['FormRequest']['printFormat'] == 2) ? '_blank' : '')),
                         array('items' => array(
-                            array('label' => 'Excel', 'url' => '#', 'active' => Yii::app()->params['FormRequest']['printFormat'] == 1 ? true : false, 'linkOptions' => array('onclick' => 'setPrintFormat("FormRequest", 2)')),
-                            array('label' => 'PDF', 'url' => '#', 'active' => Yii::app()->params['FormRequest']['printFormat'] == 2 ? true : false, 'linkOptions' => array('onclick' => 'setPrintFormat("FormRequest", 1)')),
+                            array('label' => 'PDF', 'url' => '#', 'active' => Yii::app()->params['FormRequest']['printFormat'] == 1, 'linkOptions' => array('onclick' => 'setPrintFormat("FormRequest", 1)')),
+                            array('label' => 'Excel', 'url' => '#', 'active' => Yii::app()->params['FormRequest']['printFormat'] == 2, 'linkOptions' => array('onclick' => 'setPrintFormat("FormRequest", 2)')),
+                            array('label' => 'Word', 'url' => '#', 'active' => Yii::app()->params['FormRequest']['printFormat'] == 3, 'linkOptions' => array('onclick' => 'setPrintFormat("FormRequest", 3)')),
                         )),
                     ),
                 ));

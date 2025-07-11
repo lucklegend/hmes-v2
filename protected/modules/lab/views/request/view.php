@@ -235,7 +235,7 @@
                 'header' => 'Actions',
                 'class' => 'bootstrap.widgets.TbButtonColumn',
                 'deleteConfirmation' => "js:'Do you really want to delete sample: '+$.trim($(this).parent().parent().children(':nth-child(2)').text())+'?'",
-                'template' => ($generated >= 1) ? '{delete} {worksheet}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete} {worksheet}' : (Yii::app()->getModule('lab')->isLabAdmin() == 'Lab - System Manager' ? ' {worksheet}' : '{cancel}')),
+                'template' => ($generated >= 1) ? '{delete} {worksheet} {worksheetWord}' : (Yii::app()->getModule('lab')->isAdmin() ? '{delete} {worksheet} {worksheetWord}' : (Yii::app()->getModule('lab')->isLabAdmin() == 'Lab - System Manager' ? ' {worksheet} {worksheetWord}' : '{cancel}')),
                 'buttons' => array(
                     'delete' => array(
                         'label' => 'Delete Sample',
@@ -245,8 +245,14 @@
                         'label' => 'Print Worksheet',
                         'icon' => 'print',
                         'url' => 'Yii::app()->createUrl("lab/sample/printworksheet/id/$data->id")',
-                        'options' => array('target' => '_blank'),
-                        'onClick' => 'js:preventDefault()',
+                        'options' => array('target' => '_blank', 'title' => 'Print Worksheet as PDF'),
+                        // 'onClick' => 'js:event.preventDefault()', // Corrected potential typo
+                    ),
+                    'worksheetWord' => array(
+                        'label' => 'Print Worksheet as Word',
+                        'icon' => 'file', // Using a generic 'file' icon, could be changed
+                        'url' => 'Yii::app()->createUrl("lab/sample/printworksheetWord/id/$data->id")',
+                        'options' => array('target' => '_blank', 'title' => 'Print Worksheet as Word'),
                     ),
                     'cancel' => array(
                         'label' => 'Cancel',

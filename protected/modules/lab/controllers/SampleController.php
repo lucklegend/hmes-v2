@@ -531,6 +531,181 @@ class SampleController extends Controller
 		//Yii::app()->end();
 
 	}
+
+	public function actionPrintworksheetWord($id)
+	{
+		// Manually include PHPWord and Common library autoloaders
+		// Adjust paths if they are different
+		require_once(Yii::getPathOfAlias('application.vendors.PHPOffice.Common') . '/autoload.php');
+		require_once(Yii::getPathOfAlias('application.vendors.PHPOffice.PHPWord') . '/bootstrap.php');
+
+		$sample = Sample::model()->findByPk($id);
+		$request = Request::model()->findByPk($sample->request_id);
+
+		$codes = explode('-', $sample->sampleCode);
+		$sampleCode = $sample->requestId . '-' . substr($codes[1], 1);
+
+		foreach ($sample->analyses as $analysis) {
+			$sampleWorksheet = $analysis->worksheet;
+		}
+
+		if ($sampleWorksheet == '') {
+			// Or perhaps render an error message
+			return $this->redirect(array('request/view', 'id' => $sample->request_id));
+		}
+
+		// Initialize PHPWord object
+		$phpWord = new \PhpOffice\PhpWord\PhpWord();
+		$phpWord->getCompatibility()->setOoxmlVersion(15); // Office 2013 / 2016
+
+		// Set default font and size (optional, but good practice)
+		$phpWord->setDefaultFontName('Times New Roman');
+		$phpWord->setDefaultFontSize(11);
+
+		// Add a section to the document
+		$section = $phpWord->addSection();
+
+		// --- Document Header ---
+		$section->addText('LABORATORY WORKSHEET', array('bold' => true, 'size' => 14, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+		$section->addTextBreak(1);
+
+		$section->addText('Request Reference No.: ' . $request->requestRefNum, array('bold' => true));
+		$section->addText('Sample Code: ' . $sampleCode, array('bold' => true));
+		$section->addText('Sample Name: ' . $sample->sampleName, array('bold' => true));
+		$section->addText('Date Submitted: ' . Yii::app()->dateFormatter->format("yyyy-MM-dd", $request->requestDate), array('bold' => true)); // Assuming requestDate exists
+		$section->addText('Worksheet Type: ' . ucfirst($sampleWorksheet)); // e.g., Balanceworksheet
+		$section->addTextBreak(1);
+
+		// --- Specific Worksheet Content ---
+		// Start with 'balanceworksheet'
+		if ($sampleWorksheet == 'balanceworksheet') {
+			$section->addText('Balance Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+
+			// Example Table for Balance Worksheet (customize as needed)
+			$tableStyle = array('borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 80);
+			$phpWord->addTableStyle('BalanceTable', $tableStyle);
+			$table = $section->addTable('BalanceTable');
+
+			// Table Header
+			$table->addRow();
+			$table->addCell(2000)->addText('Parameter', array('bold' => true));
+			$table->addCell(2000)->addText('Standard Value', array('bold' => true));
+			$table->addCell(2000)->addText('Reading 1', array('bold' => true));
+			$table->addCell(2000)->addText('Reading 2', array('bold' => true));
+			$table->addCell(2000)->addText('Reading 3', array('bold' => true));
+			$table->addCell(2000)->addText('Average', array('bold' => true));
+			$table->addCell(2000)->addText('Correction', array('bold' => true));
+
+			// Example Data Rows (add more rows based on actual data)
+			for ($i = 0; $i < 5; $i++) {
+				$table->addRow();
+				$table->addCell(2000)->addText('Point ' . ($i + 1));
+				$table->addCell(2000)->addText(''); // Placeholder for Standard Value
+				$table->addCell(2000)->addText(''); // Placeholder for Reading 1
+				$table->addCell(2000)->addText(''); // Placeholder for Reading 2
+				$table->addCell(2000)->addText(''); // Placeholder for Reading 3
+				$table->addCell(2000)->addText(''); // Placeholder for Average
+				$table->addCell(2000)->addText(''); // Placeholder for Correction
+			}
+			$section->addTextBreak(1);
+
+			$section->addText('Remarks:', array('italic' => true));
+			$section->addTextBreak(2); // Add some space for remarks
+
+		} elseif ($sampleWorksheet == 'hydrostaticworksheet') {
+			// Placeholder for hydrostaticworksheet content
+			$section->addText('Hydrostatic Test Worksheet content to be implemented.', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			// Add specific tables and text for hydrostatic tests here
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'pressureworksheet') {
+			$section->addText('Pressure Gauge Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'reliefvalveworksheet') {
+			$section->addText('Relief Valve Test Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'loadworksheet') {
+			$section->addText('Load Cell/Force Gauge Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'pneumaticworksheet') {
+			$section->addText('Pneumatic Device Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'stopwatchworksheet') {
+			$section->addText('Stopwatch/Timer Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'textiletapeworksheet') {
+			$section->addText('Textile Tape Measure Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'steeltapeworksheet') {
+			$section->addText('Steel Tape Measure Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'steeltapeworksheet50') {
+			$section->addText('Steel Tape Measure (50m) Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'steelruleworksheet') {
+			$section->addText('Steel Rule Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'tempcontrollerworksheet') {
+			$section->addText('Temperature Controller Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		} elseif ($sampleWorksheet == 'storagetankworksheet') {
+			$section->addText('Storage Tank Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+			$section->addTextBreak(1);
+			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+		}
+		// Add more elseif blocks for other worksheet types:
+		// pressureworksheet, reliefvalveworksheet, loadworksheet, etc.
+		else { // Handles default 'requestPdf' or any other unknown type
+			$section->addText('Worksheet type "' . $sampleWorksheet . '" is not yet fully implemented for Word export.', array('bold' => true, 'color' => 'FF0000'));
+			$section->addText('Basic Information:', array('bold' => true));
+			$section->addText("Sample ID: " . $sample->id);
+			$section->addText("Sample Code: " . $sampleCode);
+			$section->addText("Request ID: " . $request->requestRefNum);
+		}
+
+		$section->addTextBreak(2);
+
+		// --- Document Footer / Signatures ---
+		$footerTableStyle = array('cellMargin' => 80);
+		$phpWord->addTableStyle('FooterTable', $footerTableStyle);
+		$footerTable = $section->addTable('FooterTable');
+
+		$footerTable->addRow();
+		$footerTable->addCell(4500)->addText('Analyst: _________________________');
+		$footerTable->addCell(4500)->addText('Date: ____________');
+
+		$footerTable->addRow();
+		$footerTable->addCell(4500)->addText('Checked by: _________________________');
+		$footerTable->addCell(4500)->addText('Date: ____________');
+
+		$footerTable->addRow();
+		$footerTable->addCell(4500)->addText('Approved by: _________________________');
+		$footerTable->addCell(4500)->addText('Date: ____________');
+
+		// Filename for the downloaded Word document
+		$filename = preg_replace('/[^a-zA-Z0-9-_\.]/', '', $sampleCode . '_' . $sampleWorksheet . '.docx'); // Sanitize filename
+
+		// Set headers for Word document download
+		header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		header('Content-Disposition: attachment;filename="' . $filename . '"');
+		header('Cache-Control: max-age=0');
+
+		// Save Word document to output
+		$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+		$objWriter->save('php://output');
+		Yii::app()->end();
+	}
 	public function actionGenerateSampleCodeReferral()
 	{
 		$html = "<pre>";

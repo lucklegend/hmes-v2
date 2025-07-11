@@ -1,0 +1,13 @@
+{
+    "name": "ulims/ulims",
+    "description": "ULIMS Project",
+    "require": {
+        "phpoffice/phpword": "v1.2.0"
+    },
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "you@example.com"
+        }
+    ]
+}

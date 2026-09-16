@@ -536,8 +536,17 @@ class SampleController extends Controller
 	{
 		// Manually include PHPWord and Common library autoloaders
 		// Adjust paths if they are different
-		require_once(Yii::getPathOfAlias('application.vendors.PHPOffice.Common') . '/autoload.php');
-		require_once(Yii::getPathOfAlias('application.vendors.PHPOffice.PHPWord') . '/bootstrap.php');
+        // Prepare autoloader paths
+        $commonAutoloader   = Yii::getPathOfAlias('application.vendors.PHPOffice.Common') . '/autoload.php';
+        $phpWordBootstrap   = Yii::getPathOfAlias('application.vendors.PHPOffice.PHPWord') . '/bootstrap.php';
+
+        // Ensure both files exist before including
+        if (!file_exists($commonAutoloader) || !file_exists($phpWordBootstrap)) {
+            throw new CHttpException(500, 'PHPWord library not found. Please run composer install.');
+        }
+
+        require_once($commonAutoloader);
+        require_once($phpWordBootstrap);
 
 		$sample = Sample::model()->findByPk($id);
 		$request = Request::model()->findByPk($sample->request_id);

@@ -708,7 +708,11 @@ class SampleController extends Controller
 		$footerTable->addCell(4500)->addText('Date: ____________');
 
 		// Filename for the downloaded Word document
-		$filename = preg_replace('/[^a-zA-Z0-9-_\.]/', '', $sampleCode . '_' . $sampleWorksheet . '.docx'); // Sanitize filename
+        // More comprehensive filename sanitization
+        $filename = $sampleCode . '_' . $sampleWorksheet;
+        $filename = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $filename);
+        $filename = preg_replace('/[^a-zA-Z0-9-_]/', '_', $filename);
+        $filename = substr($filename, 0, 200) . '.docx'; // Limit length to avoid filesystem issues
 
 		// Set headers for Word document download
         // Check if headers have already been sent

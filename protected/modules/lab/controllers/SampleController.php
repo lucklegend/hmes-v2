@@ -711,10 +711,15 @@ class SampleController extends Controller
 		$filename = preg_replace('/[^a-zA-Z0-9-_\.]/', '', $sampleCode . '_' . $sampleWorksheet . '.docx'); // Sanitize filename
 
 		// Set headers for Word document download
-		header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-		header('Content-Disposition: attachment;filename="' . $filename . '"');
-		header('Cache-Control: max-age=0');
+        // Check if headers have already been sent
+        if (headers_sent()) {
+            throw new CHttpException(500, 'Cannot modify header information - headers already sent');
+        }
 
+        // Set headers for Word document download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 		// Save Word document to output
 		$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 		$objWriter->save('php://output');

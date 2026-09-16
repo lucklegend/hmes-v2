@@ -464,7 +464,17 @@ class SampleController extends Controller
 			? $worksheetComponents[$sampleWorksheet]
 			: 'application.extensions.tcpdf.requestPdf';
 
-		$pdf = Yii::createComponent($component, 'P', 'cm', 'A4', true, 'UTF-8', false);
+		Yii::import($component, true);
+
+		$pdf = Yii::createComponent(
+			$component,
+			PDF_PAGE_ORIENTATION,
+			PDF_UNIT,
+			PDF_PAGE_FORMAT,
+			true,
+			'UTF-8',
+			false
+		);
 
 		if ($sampleWorksheet == 'storagetankworksheet') {
 			$pdf->setFooterMargin(20);

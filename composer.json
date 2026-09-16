@@ -12,5 +12,8 @@
             "name": "Your Name",
             "email": "you@example.com"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpunit/phpunit-selenium": "1.4"
+    }
 }

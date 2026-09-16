@@ -533,19 +533,12 @@ class SampleController extends Controller
 
 	public function actionPrintworksheetWord($id)
 	{
-		// Manually include PHPWord and Common library autoloaders
-		// Adjust paths if they are different
-        // Prepare autoloader paths
-        $commonAutoloader   = Yii::getPathOfAlias('application.vendors.PHPOffice.Common') . '/autoload.php';
-        $phpWordBootstrap   = Yii::getPathOfAlias('application.vendors.PHPOffice.PHPWord') . '/bootstrap.php';
-
-        // Ensure both files exist before including
-        if (!file_exists($commonAutoloader) || !file_exists($phpWordBootstrap)) {
+		$composerAutoloader = Yii::getPathOfAlias('application') . '/../vendor/autoload.php';
+		if (!file_exists($composerAutoloader)) {
             throw new CHttpException(500, 'PHPWord library not found. Please run composer install.');
         }
 
-        require_once($commonAutoloader);
-        require_once($phpWordBootstrap);
+		require_once($composerAutoloader);
 
         $sample = Sample::model()->findByPk($id);
         if ($sample === null) {

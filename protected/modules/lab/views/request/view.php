@@ -460,7 +460,6 @@
                         'label' => 'Delete Package',
                         'url' => 'Yii::app()->createUrl("lab/analysis/deletePackage/id/$data->id")',
                         //'options'=>array('class'=>'Add 1 more'),
-                        'imageUrl' => '',
                         'imageUrl' => Yii::app()->request->baseUrl . '/images/customer_add.png',
                         'visible' => '$data->package == 1'
                     ),

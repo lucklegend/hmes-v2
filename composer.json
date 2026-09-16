@@ -1,7 +1,10 @@
 {
     "name": "ulims/ulims",
     "description": "ULIMS Project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
     "require": {
+        "php": ">=7.2.0",
         "phpoffice/phpword": "v1.2.0"
     },
     "authors": [

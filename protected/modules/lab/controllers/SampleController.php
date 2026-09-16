@@ -548,9 +548,14 @@ class SampleController extends Controller
         require_once($commonAutoloader);
         require_once($phpWordBootstrap);
 
-		$sample = Sample::model()->findByPk($id);
-		$request = Request::model()->findByPk($sample->request_id);
-
+        $sample = Sample::model()->findByPk($id);
+        if ($sample === null) {
+            throw new CHttpException(404, 'The requested sample does not exist.');
+        }
+        $request = Request::model()->findByPk($sample->request_id);
+        if ($request === null) {
+            throw new CHttpException(404, 'The associated request does not exist.');
+        }
 		$codes = explode('-', $sample->sampleCode);
 		$sampleCode = $sample->requestId . '-' . substr($codes[1], 1);
 

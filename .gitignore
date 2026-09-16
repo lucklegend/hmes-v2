@@ -7,3 +7,4 @@ themes/classic/views/
 protected/config/*
 hmeskey
 hmeskey.pub
+vendor/*

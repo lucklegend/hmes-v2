@@ -1006,6 +1006,13 @@ class RequestController extends Controller
 
 	}
 	
+	/**
+	 * Generates and outputs a PDF document for the specified request, including all samples and analyses.
+	 *
+	 * Calculates the subtotal of analysis fees, applies discounts, inplant and additional charges, and VAT if applicable, to determine the grand total. Updates the request's total in the database. If any sample lacks analyses, redirects to the request view with an error message. Outputs the generated PDF inline to the browser.
+	 *
+	 * @param integer $id The primary key of the request to print.
+	 */
 	public function actionPrintPDF($id)
 	{
 		//echo '<link rel="shortcut icon" href="'.$baseUrl.'/img/icons/favicon.ico?v=2">';
@@ -1068,7 +1075,69 @@ class RequestController extends Controller
         $pdf->Output($request->requestRefNum.'.pdf', 'I');
         //Yii::app()->end();
 	}
+
+	/**
+	 * Generates and outputs a Word document for the specified request, including all samples and analyses.
+	 *
+	 * Calculates the subtotal, applies discounts, inplant and additional charges, and VAT if applicable, then updates the request's total before generating the document. The generated Word file contains all relevant request details and is sent as a download to the user.
+	 *
+	 * @param integer $id The primary key of the request to print.
+	 */
+	public function actionPrintWord($id)
+	{
+		$request = Request::model()->findByPk($id);
+
+		// Similar calculations as in actionPrintPDF, or ensure requestWord handles them.
+		// For now, assume requestWord will handle necessary data hydration.
+		// It's good practice to ensure totals are updated before any print action.
+		$subTotal =0;
+		foreach($request->samps as $sample){
+			foreach($sample->analyses as $analysis){
+				$subTotal = $subTotal + $analysis->fee;
+			}
+		}
+		if($request->discount == 8){ // Assuming 8 is a special discount ID
+			$discounted = $request->discounted; // Pre-calculated discount
+		} else {
+			// Ensure disc relationship and rate property exist and are valid
+			$discountRate = (isset($request->disc) && isset($request->disc->rate)) ? $request->disc->rate : 0;
+			$discounted = $subTotal * ($discountRate / 100);
+		}
+
+        $inplantcharge = $request->inplant_charge;
+        $additional = $request->additional;
+        $totalFees = $inplantcharge + $additional + $subTotal - $discounted;
+
+        if($request->vat == 1){
+		$vat = $totalFees * 0.12;
+        }else{
+		$vat = 0;
+        }
+        $grandTotal = $totalFees + $vat;
+
+        // Update the request total. This is also done in actionPrintPDF.
+        // Consider refactoring this to a common method if it's always needed before printing.
+        Request::model()->updateByPk($id, array('total'=>$grandTotal) );
+        $request = Request::model()->findByPk($id); // Re-load to get updated total
+
+		// Yii::import('application.extensions.phpword.requestWord');
+		// The above Yii::import might not be strictly necessary if Yii's autoloader
+		// is configured to find classes in protected/extensions (which is common).
+		// However, PHPWord itself needs its bootstrap.php to be included once.
+		// This is handled in requestWord.php for now.
+
+		$wordDoc = new requestWord($request);
+        $wordDoc->generateDocument();
+        Yii::app()->end(); // Ensure no further output interferes with the file download
+	}
 	
+	/**
+	 * Calculates the total amount for a request and redirects to the appropriate print action based on the configured print format.
+	 *
+	 * The method computes the subtotal of all analysis fees for the request, applies discounts, inplant charges, and additional fees, updates the request's total, and then redirects to generate a PDF, Excel, or Word document as specified by application parameters.
+	 *
+	 * @param integer $id The ID of the request to print.
+	 */
 	function actionPrint($id)
 	{
 		$request = Request::model()->findByPk($id);
@@ -1090,6 +1159,9 @@ class RequestController extends Controller
 				break;
 			case 2:
 				$this->redirect(array('genRequestExcel','id'=>$id));
+				break;
+			case 3: // Assuming 3 will be for Word
+				$this->redirect(array('printWord','id'=>$id));
 				break;
 			default:
 				$this->redirect(array('printPDF','id'=>$id));

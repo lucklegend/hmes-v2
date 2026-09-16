@@ -786,8 +786,12 @@
     $image = CHtml::image(Yii::app()->request->baseUrl . '/images/ajax-loader.gif');
     $viewRequestURL = $this->createUrl('request/view');
     Yii::app()->clientScript->registerScript('clkrowgrid', "
-        $('#sample-grid table tbody tr').live('click',function()
+        $('#sample-grid table tbody tr').live('click',function(event)
         {
+            if ($(event.target).closest('.button-column').length) {
+                return;
+            }
+
             var id = $.fn.yiiGridView.getKey(
             'sample-grid',
             $(this).prevAll().length 

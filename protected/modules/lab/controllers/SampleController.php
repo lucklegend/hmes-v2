@@ -646,9 +646,8 @@ class SampleController extends Controller
 			$section->addTextBreak(1);
 			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
 		} elseif ($sampleWorksheet == 'textiletapeworksheet') {
-			$section->addText('Textile Tape Measure Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
-			$section->addTextBreak(1);
-			$section->addText('Details for this worksheet type need to be implemented.', array('italic' => true));
+			$worksheet = new TextileTapeWorksheetWord;
+			$worksheet->render($section, $phpWord, $request, $sample, $sampleCode);
 		} elseif ($sampleWorksheet == 'steeltapeworksheet') {
 			$section->addText('Steel Tape Measure Calibration Worksheet', array('bold' => true, 'size' => 12, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
 			$section->addTextBreak(1);
@@ -796,17 +795,7 @@ class SampleController extends Controller
 
 	function updateGeneratedRequest($modelRequest)
 	{
-		/*$currentRequest = Requestcode::model()->find(array(
-    		'condition'=>'rstl_id = :rstl_id AND requestRefNum = :requestRefNum',
-    		//'params'=>array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':requestRefNum' => $modelRequest->requestRefNum)
-    		'params'=>array(':rstl_id' => Yii::app()->user->rstlId, ':requestRefNum' => $modelRequest->requestRefNum)
-		));
-		$lastGenerated = Generatedrequest::model()->find(array(
-			'condition' => 'rstl_id = :rstl_id AND labId = :labId',
-			'params' => array(':rstl_id' => Yii::app()->Controller->getRstlId(), ':labId' => $modelRequest->labId)
-		));*/
 		$currentRequest = explode('-', $modelRequest->requestRefNum);
-
 		$generatedRequest = new Generatedrequest;
 		$generatedRequest->rstl_id = $modelRequest->rstl_id;
 		$generatedRequest->request_id = $modelRequest->id;
